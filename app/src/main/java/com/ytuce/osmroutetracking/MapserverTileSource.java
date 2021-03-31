@@ -6,11 +6,11 @@ import org.osmdroid.util.MapTileIndex;
 
 public class MapserverTileSource extends OnlineTileSourceBase {
 
-    public static final String[] baseUrl = {"http://10.0.2.2/cgi-bin/mapserv.exe?" +
+    public static final String[] baseUrl = {EnvironmentVariables.MAPSERVER_LOCALHOST + "/cgi-bin/mapserv.exe?" +
             "mode=tile&" +
             "template=openlayers&" +
             "layers=all&" +
-            "map=D:/ms4w/apps/osm/basemaps/osm-google.map&" +
+            "map=" + EnvironmentVariables.MAP_FILE_DIRECTORY + "&" +
             "tilemode=gmap"};
 
     public MapserverTileSource(String pName, int pZoomMinLevel, int pZoomMaxLevel, int pTileSizePixels, String pImageFilenameEnding, String[] pBaseUrl, String pCopyright) {

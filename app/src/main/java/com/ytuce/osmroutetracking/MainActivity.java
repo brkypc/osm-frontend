@@ -16,6 +16,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        EnvironmentVariables.set();
+
         startTrackingService();
 
         goMapButton = (Button) findViewById(R.id.button_goMap);
