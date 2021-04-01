@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +50,7 @@ public class TrackingService extends Service {
     private static final String SHARED_PREFS_STATUS_FILE = "service_prefs";
     private static final String STATUS_KEY = "status";
 
-    private static final String SHARED_PREFS_POINTS_FILE = "points";
+    public static final String SHARED_PREFS_POINTS_FILE = "points";
 
     private static String currentStatus = "";
     private ArrayList<TrackingItem> points = null;
@@ -115,8 +116,10 @@ public class TrackingService extends Service {
                 trackLocation(context);
             } else if (locationPermissionStatus == LOCATION_PERMISSION_NOT_GRANTED) {
                 Log.e(TAG, "Location permission not granted");
+                Toast.makeText(context, "Konum izinleri verilmemis", Toast.LENGTH_LONG).show();
             } else if (locationPermissionStatus == LOCATION_PROVIDER_NOT_AVAILABLE) {
                 Log.e(TAG, "Location services is not available (permission granted)");
+                Toast.makeText(context, "Konum servisleri acik degil", Toast.LENGTH_LONG).show();
             }
         } else if (extra != null && extra.equals(IDLE_TRACKING)) {
             Log.e(TAG, "set idle");
