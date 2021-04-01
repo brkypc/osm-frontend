@@ -1,13 +1,13 @@
 package com.ytuce.osmroutetracking;
 
 import android.Manifest;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -18,37 +18,46 @@ import android.os.IBinder;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
-import org.osmdroid.util.GeoPoint;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
 public class TrackingService extends Service {
 
-    private final String TAG = "TrackingService";
+    private static final String TAG = "TrackingService";
+
+    public interface StatusListener {
+        void onServiceStart();
+        void onServiceStop();
+        void onServiceIdle();
+    }
 
     // permission keys
-    private final int LOCATION_ACCESS_GRANTED = 0;
-    private final int LOCATION_PERMISSION_NOT_GRANTED = -1;
-    private final int LOCATION_PROVIDER_NOT_AVAILABLE = -2;
+    private static final int LOCATION_ACCESS_GRANTED = 0;
+    private static final int LOCATION_PERMISSION_NOT_GRANTED = -1;
+    private static final int LOCATION_PROVIDER_NOT_AVAILABLE = -2;
 
     // intent keys
-    public final String START_TRACKING = "start";
-    public final String STOP_TRACKING = "stop";
-    public final String INTENT_STRING_EXTRA = "extra";
+    public static final String START_TRACKING = "start";
+    public static final String STOP_TRACKING = "stop";
+    public static final String IDLE_TRACKING = "idle";
+    public static final String INTENT_STRING_EXTRA = "extra";
 
-    // notification keys ('status' in setNotification)
-    private final String NOTIFICATION_TRACKING = "tracking";
-    private final String NOTIFICATION_TRACKING_STOPPED = "stop";
-    private final String NOTIFICATION_READY = "ready";
+    private static final String SHARED_PREFS_STATUS_FILE = "service_prefs";
+    private static final String STATUS_KEY = "status";
 
+    private static final String SHARED_PREFS_POINTS_FILE = "points";
+
+    private static String currentStatus = "";
     private ArrayList<TrackingItem> points = null;
     private int locationPermissionStatus;
     private boolean gpsProviderActive;
     private boolean networkProviderActive;
     private Location moreAccurateLocation;
+    private static List<StatusListener> statusListeners;
 
     public TrackingService() {
     }
@@ -56,7 +65,8 @@ public class TrackingService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        // throw new UnsupportedOperationException("Not yet implemented");
+        return null;
     }
 
     @Override
@@ -67,9 +77,26 @@ public class TrackingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.e(TAG, "Service created");
-
         Context context = getApplicationContext();
+
+        if (currentStatus.equals("")) {
+            SharedPreferences preferences = this.getSharedPreferences(SHARED_PREFS_STATUS_FILE, MODE_PRIVATE);
+            currentStatus = preferences.getString(STATUS_KEY, IDLE_TRACKING);
+            Log.e(TAG, "status updated from file");
+        }
+
+        if (points != null) {
+            Log.e(TAG, "points.size() = " + points.size());
+        } else {
+            Log.e(TAG, "points = null");
+
+            LocalObjectStorage<TrackingItem> storage = new LocalObjectStorage<>();
+            points = storage.getList(SHARED_PREFS_POINTS_FILE, context, TrackingItem.class);
+
+            Log.e(TAG, "points.size() after read from file = " + points.size());
+        }
+
+        Log.e(TAG, "Service created");
 
         String extra;
         if (intent == null) {
@@ -80,7 +107,7 @@ public class TrackingService extends Service {
         }
         if (extra != null && extra.equals(STOP_TRACKING)) {
             stopTracking(context);
-        } else {
+        } else if ((extra != null && extra.equals(START_TRACKING)) || currentStatus.equals(START_TRACKING)) {
 
             refreshData();
             locationPermissionStatus = checkLocationAccess(context);
@@ -91,9 +118,20 @@ public class TrackingService extends Service {
             } else if (locationPermissionStatus == LOCATION_PROVIDER_NOT_AVAILABLE) {
                 Log.e(TAG, "Location services is not available (permission granted)");
             }
+        } else if (extra != null && extra.equals(IDLE_TRACKING)) {
+            Log.e(TAG, "set idle");
+            refreshData();
+            idleTracking(context);
+        } else {
+            Log.e(TAG, "extra = null");
         }
 
+
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    public static String getServiceStatus() {
+        return currentStatus;
     }
 
     private void refreshData() {
@@ -104,6 +142,9 @@ public class TrackingService extends Service {
         gpsProviderActive = false;
         networkProviderActive = false;
         moreAccurateLocation = null;
+        if (statusListeners == null) {
+            statusListeners = new ArrayList<>();
+        }
     }
 
     private int checkLocationAccess(Context context) {
@@ -142,7 +183,10 @@ public class TrackingService extends Service {
 
     private void trackLocation(Context context) {
 
-        setNotification(NOTIFICATION_TRACKING, context);
+        setNotification(START_TRACKING, context);
+        currentStatus = START_TRACKING;
+
+        triggerListeners(START_TRACKING);
 
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
@@ -151,6 +195,10 @@ public class TrackingService extends Service {
                 TrackingItem item = new TrackingItem(location);
                 points.add(item);
                 Log.e(TAG, item.toString());
+
+                LocalObjectStorage<TrackingItem> storage = new LocalObjectStorage<>();
+                storage.putElement(item, SHARED_PREFS_POINTS_FILE, context);
+
                 // TODO control location accuracy
                 // https://github.com/y20k/trackbook/blob/9086f4801f0f042e0ae58b9d957c3efdce3fdb0f/app/src/main/java/org/y20k/trackbook/TrackerService.kt#L298
                 // https://github.com/y20k/trackbook/blob/9086f4801f0f042e0ae58b9d957c3efdce3fdb0f/app/src/main/java/org/y20k/trackbook/helpers/LocationHelper.kt#L80
@@ -195,8 +243,21 @@ public class TrackingService extends Service {
     }
 
     private void stopTracking(Context context) {
-        setNotification(NOTIFICATION_TRACKING_STOPPED, context);
+        setNotification(STOP_TRACKING, context);
+        currentStatus = STOP_TRACKING;
+
+        LocalObjectStorage<TrackingItem> storage = new LocalObjectStorage<>();
+        storage.deleteList(SHARED_PREFS_POINTS_FILE, context);
+
+        triggerListeners(STOP_TRACKING);
         // TODO save to database
+    }
+
+    private void idleTracking(Context context) {
+        setNotification(IDLE_TRACKING, context);
+        currentStatus = IDLE_TRACKING;
+
+        triggerListeners(IDLE_TRACKING);
     }
 
     private void setNotification(@NotNull String status, Context context) {
@@ -207,26 +268,27 @@ public class TrackingService extends Service {
         PendingIntent buttonPendingIntent = null;
         boolean ongoing; // set true if you want to disable swipe to delete
 
-        if (status.equals(NOTIFICATION_TRACKING)) {
+        if (status.equals(START_TRACKING)) {
             contentTitle = "Konum takibi aktif";
             contentText = "Hareketiniz kaydediliyor";
             buttonText = "Bitir";
             ongoing = true;
 
-            Intent stopTrackingIntent = new Intent(context, TrackingService.class);
-            stopTrackingIntent.putExtra(INTENT_STRING_EXTRA, STOP_TRACKING);
-            stopTrackingIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            buttonPendingIntent = PendingIntent.getService(context, 0, stopTrackingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        } else /* if (status.equals(NOTIFICATION_TRACKING_STOPPED)) */ {
+            buttonPendingIntent = getStopperIntent(context);
+        } else if (status.equals(STOP_TRACKING)) {
             contentTitle = "Konum takibi durduruldu";
             contentText = "Rota sonlandirildi";
             buttonText = "Yeniden başla";
             ongoing = false;
 
-            Intent startTrackingIntent = new Intent(context, TrackingService.class);
-            startTrackingIntent.putExtra(INTENT_STRING_EXTRA, START_TRACKING);
-            startTrackingIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            buttonPendingIntent = PendingIntent.getService(context, 0, startTrackingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            buttonPendingIntent = getStarterIntent(context);
+        } else /* if status IDLE */ {
+            contentTitle = "Konum servisi hazir";
+            contentText = "Konumunuz kaydedilmiyor";
+            buttonText = "Basla";
+            ongoing = false;
+
+            buttonPendingIntent = getStarterIntent(context);
         }
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -242,7 +304,7 @@ public class TrackingService extends Service {
                 .setContentText(contentText)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setNotificationSilent()
-                .setOngoing(ongoing) // disable swipe to delete
+                .setOngoing(ongoing) // disable (or enable) swipe to delete
                 .addAction(R.drawable.osm_ic_follow_me, buttonText, buttonPendingIntent);
 
         Intent intent = new Intent(context, MainActivity.class);
@@ -250,6 +312,73 @@ public class TrackingService extends Service {
         notificationBuilder.setContentIntent(pendingIntent);
 
         notificationManager.notify(0, notificationBuilder.build());
+    }
+
+    private PendingIntent getStarterIntent(Context context) {
+        Intent startTrackingIntent = new Intent(context, TrackingService.class);
+        startTrackingIntent.putExtra(INTENT_STRING_EXTRA, START_TRACKING);
+        startTrackingIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return PendingIntent.getService(context, 0, startTrackingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private PendingIntent getStopperIntent(Context context) {
+        Intent stopTrackingIntent = new Intent(context, TrackingService.class);
+        stopTrackingIntent.putExtra(INTENT_STRING_EXTRA, STOP_TRACKING);
+        stopTrackingIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return PendingIntent.getService(context, 0, stopTrackingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public static void addStatusListener(boolean getCurrent, StatusListener listener) {
+
+        if (statusListeners == null) {
+            statusListeners = new ArrayList<>();
+        }
+
+        statusListeners.add(listener);
+
+        Log.e(TAG, "listener added");
+
+        if (getCurrent) {
+            triggerListener(listener, currentStatus);
+            Log.e(TAG, "listener triggered with status = " + currentStatus);
+        }
+    }
+
+    public static void addStatusListener(StatusListener listener) {
+
+        if (statusListeners == null) {
+            statusListeners = new ArrayList<>();
+        }
+
+        statusListeners.add(listener);
+    }
+
+    private void triggerListeners(String status) {
+
+        SharedPreferences preferences = getSharedPreferences(SHARED_PREFS_STATUS_FILE, MODE_PRIVATE);
+        preferences.edit().putString(STATUS_KEY, status).apply();
+
+        if (statusListeners == null || statusListeners.size() == 0) {
+            return;
+        }
+
+        for (StatusListener statusListener : statusListeners) {
+            triggerListener(statusListener, status);
+        }
+    }
+
+    private static void triggerListener(StatusListener listener, String status) {
+        switch (currentStatus) {
+            case START_TRACKING:
+                listener.onServiceStart();
+                break;
+            case STOP_TRACKING:
+                listener.onServiceStop();
+                break;
+            case IDLE_TRACKING:
+                listener.onServiceIdle();
+                break;
+        }
     }
 
 }
