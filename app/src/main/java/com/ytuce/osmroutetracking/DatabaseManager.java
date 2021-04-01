@@ -1,14 +1,19 @@
 package com.ytuce.osmroutetracking;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class DatabaseManager {
+
+    private static final String SHARED_PREFS_ID_FILE = "client_id";
+    private static final String ID_KEY = "id";
 
     private Connection connection;
     private final Context context;
@@ -31,6 +36,7 @@ public class DatabaseManager {
             throwables.printStackTrace();
             Toast.makeText(context, "Veritabani baglantisi kurulamadi", Toast.LENGTH_LONG).show();
         }
+
     }
 
     public void pushPoints() {
@@ -50,5 +56,14 @@ public class DatabaseManager {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+    public String getClientID() {
+        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFS_ID_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        String clientID = preferences.getString(ID_KEY, UUID.randomUUID().toString());
+        editor.putString(ID_KEY, clientID);
+        editor.apply();
+        return clientID;
     }
 }
