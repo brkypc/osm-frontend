@@ -1,6 +1,9 @@
 package com.ytuce.osmroutetracking;
 
 import androidx.appcompat.app.AppCompatActivity;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -12,6 +15,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.ytuce.osmroutetracking.api.RestService;
+import com.ytuce.osmroutetracking.api.Results;
+import com.ytuce.osmroutetracking.api.RetrofitClient;
+
+import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
         }, 1000);
 
+        getAllPoints();
+
     }
 
     public void goMap(View v) {
@@ -83,5 +95,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return false;
+    }
+
+    public void getAllPoints() {
+
+        Call<List<Results>> call = RetrofitClient.getInstance().getApi().getAllPoints();
+        call.enqueue(new Callback<List<Results>>() {
+            @Override
+            public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
+                List<Results> points = response.body();
+                for (Results point : points) {
+                    Log.e("RestService", point.toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Results>> call, Throwable t) {
+                // show error
+                Log.e("RestSerivece", Objects.requireNonNull(t.getMessage()));
+            }
+        });
     }
 }

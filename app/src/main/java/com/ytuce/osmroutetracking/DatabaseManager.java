@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.UUID;
 
 public class DatabaseManager {
@@ -45,6 +46,9 @@ public class DatabaseManager {
         points = storage.getList(TrackingService.SHARED_PREFS_POINTS_FILE, context, TrackingItem.class);
 
         // TODO push list to database
+        for (TrackingItem point : points) {
+            
+        }
 
         closeConnection();
     }
@@ -58,11 +62,11 @@ public class DatabaseManager {
         }
     }
 
-    public String getClientID() {
+    public int getClientID() {
         SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFS_ID_FILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
-        String clientID = preferences.getString(ID_KEY, UUID.randomUUID().toString());
-        editor.putString(ID_KEY, clientID);
+        int clientID = preferences.getInt(ID_KEY, new Random().nextInt());
+        editor.putInt(ID_KEY, clientID);
         editor.apply();
         return clientID;
     }

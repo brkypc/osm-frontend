@@ -11,6 +11,7 @@ public class EnvironmentVariables {
     public static String PGSQL_LOCALHOST;
     public static String PGSQL_USERNAME;
     public static String PGSQL_PASSWORD;
+    public static String REST_API_BASE_URL;
 
     // change currentEnv after every `git pull`
     private static final String currentEnvironment = ENVIRONMENT_KEREM;
@@ -24,6 +25,7 @@ public class EnvironmentVariables {
                 PGSQL_LOCALHOST = ".";
                 PGSQL_USERNAME = "postgres";
                 PGSQL_PASSWORD = "1234";
+                REST_API_BASE_URL = "http://10.0.2.2:8080/";
                 break;
             case ENVIRONMENT_BERKAY:
                 MAPSERVER_LOCALHOST = ".";
@@ -31,6 +33,7 @@ public class EnvironmentVariables {
                 PGSQL_LOCALHOST = ".";
                 PGSQL_USERNAME = ".";
                 PGSQL_PASSWORD = ".";
+                REST_API_BASE_URL = ".";
             case ENVIRONMENT_PRODUCTION:
             default:
                 MAPSERVER_LOCALHOST = "..";
@@ -38,6 +41,7 @@ public class EnvironmentVariables {
                 PGSQL_LOCALHOST = ".";
                 PGSQL_USERNAME = ".";
                 PGSQL_PASSWORD = ".";
+                REST_API_BASE_URL = ".";
         }
     }
 

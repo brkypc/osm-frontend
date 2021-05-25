@@ -14,9 +14,11 @@ public class TrackingItem {
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         time = location.getTime();
-        clientId = 1;
-        trackingId = 1;
+        clientId = -1;
+        trackingId = -1;
     }
+
+    
 
     @Override
     public String toString() {
