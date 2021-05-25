@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goMap(View v) {
-        startActivity(new Intent(this, MapActivity.class));
+        startActivity(new Intent(this, MapWithListActivity.class));
     }
 
     private void startTrackingService() {
