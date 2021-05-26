@@ -1,6 +1,7 @@
 package com.ytuce.osmroutetracking.api;
 
 import com.google.gson.annotations.SerializedName;
+import com.ytuce.osmroutetracking.TrackingItem;
 
 public class Results {
 
@@ -17,7 +18,15 @@ public class Results {
     private double longitude;
 
     @SerializedName("time")
-    private int time;
+    private long time;
+
+    public Results(TrackingItem item) {
+        clientid = item.getClientId();
+        trackingid = item.getTrackingId();
+        latitude = item.getLatitude();
+        longitude = item.getLongitude();
+        time = item.getTime();
+    }
 
     public int getClientid() {
         return clientid;
@@ -51,11 +60,11 @@ public class Results {
         this.longitude = longitude;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(long time) {
         this.time = time;
     }
 

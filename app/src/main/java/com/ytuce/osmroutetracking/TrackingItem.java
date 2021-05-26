@@ -18,7 +18,33 @@ public class TrackingItem {
         trackingId = -1;
     }
 
-    
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public int getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
+    }
+
+    public int getTrackingId() {
+        return trackingId;
+    }
+
+    public void setTrackingId(int trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    public long getTime() {
+        return time;
+    }
 
     @Override
     public String toString() {

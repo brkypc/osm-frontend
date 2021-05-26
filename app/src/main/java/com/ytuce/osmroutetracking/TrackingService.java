@@ -18,13 +18,21 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ytuce.osmroutetracking.api.Results;
+import com.ytuce.osmroutetracking.api.RetrofitClient;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TrackingService extends Service {
 
@@ -49,6 +57,8 @@ public class TrackingService extends Service {
 
     private static final String SHARED_PREFS_STATUS_FILE = "service_prefs";
     private static final String STATUS_KEY = "status";
+    private static final String SHARED_PREFS_ID_FILE = "client_id";
+    private static final String ID_KEY = "id";
 
     public static final String SHARED_PREFS_POINTS_FILE = "points";
 
@@ -127,6 +137,7 @@ public class TrackingService extends Service {
             idleTracking(context);
         } else {
             Log.e(TAG, "extra = null");
+            setNotification(STOP_TRACKING, context);
         }
 
 
@@ -254,6 +265,29 @@ public class TrackingService extends Service {
 
         triggerListeners(STOP_TRACKING);
         // TODO save to database
+
+
+        int clientId = getClientID(context);
+        Random random = new Random();
+        int trackingId = random.nextInt();
+
+        for (TrackingItem point : points) {
+            point.setClientId(clientId);
+            point.setTrackingId(trackingId);
+            Call<Results> call = RetrofitClient.getInstance().getApi().pushTracking(new Results(point));
+
+            call.enqueue(new Callback<Results>() {
+                @Override
+                public void onResponse(Call<Results> call, Response<Results> response) {
+                    Log.e(TAG, "push successful");
+                }
+
+                @Override
+                public void onFailure(Call<Results> call, Throwable t) {
+                    Log.e(TAG, t.getMessage());
+                }
+            });
+        }
     }
 
     private void idleTracking(Context context) {
@@ -382,6 +416,15 @@ public class TrackingService extends Service {
                 listener.onServiceIdle();
                 break;
         }
+    }
+
+    private int getClientID(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFS_ID_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        int clientID = preferences.getInt(ID_KEY, new Random().nextInt());
+        editor.putInt(ID_KEY, clientID);
+        editor.apply();
+        return clientID;
     }
 
 }
