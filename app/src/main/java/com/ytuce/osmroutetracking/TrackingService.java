@@ -19,6 +19,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ytuce.osmroutetracking.api.Results;
+import com.ytuce.osmroutetracking.api.ResultsList;
 import com.ytuce.osmroutetracking.api.RetrofitClient;
 
 import org.jetbrains.annotations.NotNull;
@@ -274,8 +275,8 @@ public class TrackingService extends Service {
         for (TrackingItem point : points) {
             point.setClientId(clientId);
             point.setTrackingId(trackingId);
-            Call<Results> call = RetrofitClient.getInstance().getApi().pushTracking(new Results(point));
 
+            Call<Results> call = RetrofitClient.getInstance().getApi().pushTracking(new Results(point));
             call.enqueue(new Callback<Results>() {
                 @Override
                 public void onResponse(Call<Results> call, Response<Results> response) {

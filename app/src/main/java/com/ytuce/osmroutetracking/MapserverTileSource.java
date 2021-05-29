@@ -11,7 +11,8 @@ public class MapserverTileSource extends OnlineTileSourceBase {
             "template=openlayers&" +
             "layers=all&" +
             "map=" + EnvironmentVariables.MAP_FILE_DIRECTORY + "&" +
-            "tilemode=gmap"};
+            "tilemode=gmap&" +
+            "trackingid=1434798379"};
 
     public MapserverTileSource(String pName, int pZoomMinLevel, int pZoomMaxLevel, int pTileSizePixels, String pImageFilenameEnding, String[] pBaseUrl, String pCopyright) {
         super(pName, pZoomMinLevel, pZoomMaxLevel, pTileSizePixels, pImageFilenameEnding, pBaseUrl, pCopyright);

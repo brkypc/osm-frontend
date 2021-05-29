@@ -70,7 +70,7 @@ public class MapWithListActivity extends AppCompatActivity {
 
         selectedTrackingIds = new ArrayList<>();
 
-        MapserverTileSource tileSource = new MapserverTileSource("mapserver", 0, 25, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
+        MapserverTileSource tileSource = new MapserverTileSource("mapserver", -25, 25, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
         map.setTileSource(tileSource);
 
         requestPermissions(new String[] {
@@ -208,7 +208,7 @@ public class MapWithListActivity extends AppCompatActivity {
     public void getClientPoints(TrackingAdaptor adaptor, Context context) {
 
         Call<List<Results>> call = RetrofitClient.getInstance().getApi()
-                .getUserTracking("$eq." + getClientID(context));
+                .getUserTracking(getClientID(context));
 
         /*
         Call<List<Results>> call = RetrofitClient.getInstance().getApi()

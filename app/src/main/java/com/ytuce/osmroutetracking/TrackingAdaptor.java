@@ -13,7 +13,6 @@ import com.ytuce.osmroutetracking.api.Results;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class TrackingAdaptor extends RecyclerView.Adapter<TrackingAdaptor.ViewHolder> {
@@ -47,16 +46,16 @@ public class TrackingAdaptor extends RecyclerView.Adapter<TrackingAdaptor.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Results results = trackingList.get(position);
-        holder.trackingIdTextView.setText(String.valueOf(results.getTrackingid()));
+        holder.trackingIdTextView.setText(String.valueOf(results.getTrackingId()));
         holder.trackingTimeTextView.setText(String.valueOf(results.getTime()));
 
         holder.trackingCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
-                    trackingSelectionListener.addTracking(results.getTrackingid());
+                    trackingSelectionListener.addTracking(results.getTrackingId());
                 } else {
-                    trackingSelectionListener.deleteTracking(results.getTrackingid());
+                    trackingSelectionListener.deleteTracking(results.getTrackingId());
                 }
             }
         });

@@ -6,10 +6,10 @@ import com.ytuce.osmroutetracking.TrackingItem;
 public class Results {
 
     @SerializedName("clientid")
-    private int clientid;
+    private int clientId;
 
     @SerializedName("trackingid")
-    private int trackingid;
+    private int trackingId;
 
     @SerializedName("latitude")
     private double latitude;
@@ -21,27 +21,27 @@ public class Results {
     private long time;
 
     public Results(TrackingItem item) {
-        clientid = item.getClientId();
-        trackingid = item.getTrackingId();
+        clientId = item.getClientId();
+        trackingId = item.getTrackingId();
         latitude = item.getLatitude();
         longitude = item.getLongitude();
         time = item.getTime();
     }
 
-    public int getClientid() {
-        return clientid;
+    public int getClientId() {
+        return clientId;
     }
 
-    public void setClientid(int clientid) {
-        this.clientid = clientid;
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
     }
 
-    public int getTrackingid() {
-        return trackingid;
+    public int getTrackingId() {
+        return trackingId;
     }
 
-    public void setTrackingid(int trackingid) {
-        this.trackingid = trackingid;
+    public void setTrackingId(int trackingId) {
+        this.trackingId = trackingId;
     }
 
     public double getLatitude() {
@@ -71,8 +71,8 @@ public class Results {
     @Override
     public String toString() {
         return "Results{" +
-                "clientid=" + clientid +
-                ", trackingid=" + trackingid +
+                "clientid=" + clientId +
+                ", trackingid=" + trackingId +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", time=" + time +

@@ -14,13 +14,12 @@ import retrofit2.http.Query;
 
 public interface Api {
 
-    @GET("postgis_30_sample/public/users_locations")
+    @GET("/getAllPoints")
     Call<List<Results>> getAllPoints();
 
-    // id should be set to: $eq.clientid exaple: $eq.2
-    @GET("postgis_30_sample/public/users_locations")
-    Call<List<Results>> getUserTracking(@Query("clientid") String id);
+    @GET("/getPointsOfClient")
+    Call<List<Results>> getUserTracking(@Query("clientid") int id);
 
-    @POST("postgis_30_sample/public/users_locations")
-    Call<Results> pushTracking(@Body Results item);
+    @POST("/pushRouting")
+    Call<Results> pushTracking(@Body Results items);
 }
