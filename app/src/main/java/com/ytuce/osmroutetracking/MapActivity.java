@@ -44,7 +44,7 @@ public class MapActivity extends AppCompatActivity {
         map = (MapView) findViewById(R.id.mapView);
         // map.setTileSource(TileSourceFactory.MAPNIK);
 
-        MapserverTileSource tileSource = new MapserverTileSource("mapserver", 0, 25, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
+        MapserverTileSource tileSource = new MapserverTileSource("mapserver", -25, 25, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
         map.setTileSource(tileSource);
 
         requestPermissions(new String[] {

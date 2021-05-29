@@ -18,6 +18,7 @@ import com.ytuce.osmroutetracking.api.RetrofitClient;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
@@ -70,7 +71,7 @@ public class MapWithListActivity extends AppCompatActivity {
 
         selectedTrackingIds = new ArrayList<>();
 
-        MapserverTileSource tileSource = new MapserverTileSource("mapserver", -25, 25, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
+        MapserverTileSource tileSource = new MapserverTileSource("mapserver", 0, 18, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
         map.setTileSource(tileSource);
 
         requestPermissions(new String[] {
@@ -102,6 +103,10 @@ public class MapWithListActivity extends AppCompatActivity {
         scaleBarOverlay.setCentred(true);
         scaleBarOverlay.setScaleBarOffset(displayMetrics.widthPixels / 2, 10);
         map.getOverlays().add(scaleBarOverlay);
+
+        // clear cache
+        SqlTileWriter sqlTileWriter = new SqlTileWriter();
+        sqlTileWriter.purgeCache();
 
         // when tracking selection changes
         TrackingAdaptor.TrackingSelectionListener trackingSelectionListener = new TrackingAdaptor.TrackingSelectionListener() {
