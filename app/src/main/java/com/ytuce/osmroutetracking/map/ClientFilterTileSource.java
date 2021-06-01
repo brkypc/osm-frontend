@@ -2,11 +2,12 @@ package com.ytuce.osmroutetracking.map;
 
 import com.ytuce.osmroutetracking.utility.EnvironmentVariables;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClientFilterTileSource extends MapserverTileSource {
 
-    private final List<Integer> clientIds;
+    private List<Integer> clientIds;
 
     ClientFilterTileSource(
             String pName,
@@ -21,7 +22,11 @@ public class ClientFilterTileSource extends MapserverTileSource {
         super(pName, pZoomMinLevel, pZoomMaxLevel, pTileSizePixels,
                 pImageFilenameEnding, pBaseUrl, pCopyright);
 
-        this.clientIds = clientIds;
+        if (clientIds != null) {
+            this.clientIds = clientIds;
+        } else {
+            this.clientIds = new ArrayList<>();
+        }
     }
 
     public void addClient(int clientId) {
@@ -46,12 +51,15 @@ public class ClientFilterTileSource extends MapserverTileSource {
     }
 
     public static String createBaseUrl(String parameters) {
-        return EnvironmentVariables.MAPSERVER_LOCALHOST + "/cgi-bin/mapserv.exe?" +
+        String url = EnvironmentVariables.MAPSERVER_LOCALHOST + "/cgi-bin/mapserv.exe?" +
                 "mode=tile&" +
                 "template=openlayers&" +
                 "layers=all&" +
                 "map=" + EnvironmentVariables.CLIENT_FILTER_MAP_FILE_DIRECTORY + "&" +
-                "tilemode=gmap&" +
-                "clnt=" + parameters;
+                "tilemode=gmap";
+        if (parameters.length() > 0) {
+            url += "&clnt=" + parameters;
+        }
+        return url;
     }
 }

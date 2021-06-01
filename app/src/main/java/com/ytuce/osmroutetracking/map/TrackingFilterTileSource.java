@@ -1,12 +1,15 @@
 package com.ytuce.osmroutetracking.map;
 
+import android.util.Log;
+
 import com.ytuce.osmroutetracking.utility.EnvironmentVariables;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TrackingFilterTileSource extends MapserverTileSource {
 
-    private final List<Integer> trackingIds;
+    private List<Integer> trackingIds;
 
     TrackingFilterTileSource(
             String pName,
@@ -21,15 +24,19 @@ public class TrackingFilterTileSource extends MapserverTileSource {
         super(pName, pZoomMinLevel, pZoomMaxLevel, pTileSizePixels,
                 pImageFilenameEnding, pBaseUrl, pCopyright);
 
-        this.trackingIds = trackingIds;
+        if (trackingIds != null) {
+            this.trackingIds = trackingIds;
+        } else {
+            this.trackingIds = new ArrayList<>();
+        }
     }
 
-    public void addClient(int trackingId) {
+    public void addTracking(int trackingId) {
         trackingIds.add(trackingId);
         updateUrl();
     }
 
-    public void removeClient(int trackingId) {
+    public void removeTracking(int trackingId) {
 
         for (int i = 0; i < trackingIds.size(); i++) {
             if (trackingIds.get(i) == trackingId) {
@@ -46,12 +53,15 @@ public class TrackingFilterTileSource extends MapserverTileSource {
     }
 
     public static String createBaseUrl(String parameters) {
-        return EnvironmentVariables.MAPSERVER_LOCALHOST + "/cgi-bin/mapserv.exe?" +
+        String url = EnvironmentVariables.MAPSERVER_LOCALHOST + "/cgi-bin/mapserv.exe?" +
                 "mode=tile&" +
                 "template=openlayers&" +
                 "layers=all&" +
                 "map=" + EnvironmentVariables.TRACKING_FILTER_MAP_FILE_DIRECTORY + "&" +
-                "tilemode=gmap&" +
-                "trck=" + parameters;
+                "tilemode=gmap";
+        if (parameters.length() > 0) {
+            url += "&trck=" + parameters;
+        }
+        return url;
     }
 }

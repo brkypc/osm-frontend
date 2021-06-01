@@ -1,5 +1,7 @@
 package com.ytuce.osmroutetracking.map;
 
+import android.util.Log;
+
 import java.util.List;
 
 public class TileSourceFactory {
@@ -7,25 +9,10 @@ public class TileSourceFactory {
     public static final String CLIENT_FILTER = "clnt";
     public static final String TRACKING_FILTER = "trck";
 
-    private String type;
-    private List<Integer> ids;
-
     public TileSourceFactory() {
-        type = "";
-        ids = null;
     }
 
-    public TileSourceFactory setType(String type) {
-        this.type = type;
-        return this;
-    }
-
-    public TileSourceFactory setIds(List<Integer> ids) {
-        this.ids = ids;
-        return this;
-    }
-
-    public MapserverTileSource build() {
+    public MapserverTileSource build(String type, List<Integer> ids) {
 
         String parameters = "";
 
@@ -65,5 +52,13 @@ public class TileSourceFactory {
                     "YTU CE"
             );
         }
+    }
+
+    public MapserverTileSource build() {
+        return build("", null);
+    }
+
+    public MapserverTileSource build(String type) {
+        return build(type, null);
     }
 }

@@ -77,7 +77,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goMap(View v) {
-        startActivity(new Intent(this, MapWithListActivity.class));
+        Intent intent = new Intent(this, MapWithListActivity.class);
+        intent.putExtra(MapWithListActivity.MAP_MODE_INTENT_NAME, MapWithListActivity.NO_FILTER);
+        startActivity(intent);
+    }
+
+    public void showMyRoutes(View view) {
+        Intent intent = new Intent(this, MapWithListActivity.class);
+        intent.putExtra(
+                MapWithListActivity.MAP_MODE_INTENT_NAME, MapWithListActivity.TRACKING_FILTER);
+        intent.putExtra(
+                MapWithListActivity.FLAGS_INTENT_NAME, MapWithListActivity.FLAG_SHOW_MY_ROUTES);
+        startActivity(intent);
     }
 
     private void startTrackingService() {
