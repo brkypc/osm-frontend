@@ -1,7 +1,5 @@
 package com.ytuce.osmroutetracking.api;
 
-import com.ytuce.osmroutetracking.EnvironmentVariables;
-
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 

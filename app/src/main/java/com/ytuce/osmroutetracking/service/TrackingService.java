@@ -1,4 +1,4 @@
-package com.ytuce.osmroutetracking;
+package com.ytuce.osmroutetracking.service;
 
 import android.Manifest;
 import android.app.NotificationChannel;
@@ -18,15 +18,16 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ytuce.osmroutetracking.R;
+import com.ytuce.osmroutetracking.activity.MainActivity;
 import com.ytuce.osmroutetracking.api.Results;
-import com.ytuce.osmroutetracking.api.ResultsList;
 import com.ytuce.osmroutetracking.api.RetrofitClient;
+import com.ytuce.osmroutetracking.utility.LocalObjectStorage;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 import androidx.core.app.ActivityCompat;

@@ -1,4 +1,4 @@
-package com.ytuce.osmroutetracking;
+package com.ytuce.osmroutetracking.service;
 
 import android.location.Location;
 

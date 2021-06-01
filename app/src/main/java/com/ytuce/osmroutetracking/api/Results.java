@@ -1,7 +1,7 @@
 package com.ytuce.osmroutetracking.api;
 
 import com.google.gson.annotations.SerializedName;
-import com.ytuce.osmroutetracking.TrackingItem;
+import com.ytuce.osmroutetracking.service.TrackingItem;
 
 public class Results {
 

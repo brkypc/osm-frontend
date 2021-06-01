@@ -4,12 +4,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
+import com.ytuce.osmroutetracking.service.TrackingItem;
+import com.ytuce.osmroutetracking.service.TrackingService;
+import com.ytuce.osmroutetracking.utility.EnvironmentVariables;
+import com.ytuce.osmroutetracking.utility.LocalObjectStorage;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.UUID;
 
 public class DatabaseManager {
 

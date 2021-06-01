@@ -1,4 +1,4 @@
-package com.ytuce.osmroutetracking;
+package com.ytuce.osmroutetracking.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import retrofit2.Call;
@@ -16,7 +16,9 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.ytuce.osmroutetracking.api.RestService;
+import com.ytuce.osmroutetracking.utility.EnvironmentVariables;
+import com.ytuce.osmroutetracking.R;
+import com.ytuce.osmroutetracking.service.TrackingService;
 import com.ytuce.osmroutetracking.api.Results;
 import com.ytuce.osmroutetracking.api.RetrofitClient;
 

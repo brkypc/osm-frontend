@@ -1,4 +1,4 @@
-package com.ytuce.osmroutetracking;
+package com.ytuce.osmroutetracking.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,16 +12,17 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 
+import com.ytuce.osmroutetracking.R;
+import com.ytuce.osmroutetracking.map.MapserverTileSource;
+import com.ytuce.osmroutetracking.map.TileSourceFactory;
+
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
-import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
@@ -44,7 +45,7 @@ public class MapActivity extends AppCompatActivity {
         map = (MapView) findViewById(R.id.mapView);
         // map.setTileSource(TileSourceFactory.MAPNIK);
 
-        MapserverTileSource tileSource = new MapserverTileSource("mapserver", -25, 25, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
+        MapserverTileSource tileSource = new TileSourceFactory().build();
         map.setTileSource(tileSource);
 
         requestPermissions(new String[] {

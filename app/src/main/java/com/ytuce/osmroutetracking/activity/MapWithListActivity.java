@@ -1,20 +1,20 @@
-package com.ytuce.osmroutetracking;
+package com.ytuce.osmroutetracking.activity;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
-import android.widget.LinearLayout;
 
+import com.ytuce.osmroutetracking.R;
+import com.ytuce.osmroutetracking.TrackingAdaptor;
 import com.ytuce.osmroutetracking.api.Results;
 import com.ytuce.osmroutetracking.api.RetrofitClient;
+import com.ytuce.osmroutetracking.map.MapserverTileSource;
+import com.ytuce.osmroutetracking.map.TileSourceFactory;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -71,7 +71,7 @@ public class MapWithListActivity extends AppCompatActivity {
 
         selectedTrackingIds = new ArrayList<>();
 
-        MapserverTileSource tileSource = new MapserverTileSource("mapserver", 0, 18, 256, ".png", MapserverTileSource.baseUrl, "YTU CE");
+        MapserverTileSource tileSource = new TileSourceFactory().build();
         map.setTileSource(tileSource);
 
         requestPermissions(new String[] {

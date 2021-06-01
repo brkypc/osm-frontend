@@ -1,4 +1,4 @@
-package com.ytuce.osmroutetracking;
+package com.ytuce.osmroutetracking.utility;
 
 import android.content.Context;
 import android.content.SharedPreferences;
