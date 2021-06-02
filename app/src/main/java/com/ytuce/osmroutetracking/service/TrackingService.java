@@ -14,7 +14,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -290,6 +292,22 @@ public class TrackingService extends Service {
                 }
             });
         }
+
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(() -> {
+            Call<Results> call = RetrofitClient.getInstance().getApi().addRoute(clientId, trackingId);
+            call.enqueue(new Callback<Results>() {
+                @Override
+                public void onResponse(Call<Results> call, Response<Results> response) {
+                    Log.e(TAG, "add_route called");
+                }
+
+                @Override
+                public void onFailure(Call<Results> call, Throwable t) {
+                    Log.e(TAG, t.getMessage());
+                }
+            });
+        }, 2000);
     }
 
     private void idleTracking(Context context) {

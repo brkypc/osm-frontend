@@ -18,4 +18,7 @@ public interface Api {
 
     @POST("/pushRouting")
     Call<Results> pushTracking(@Body Results items);
+
+    @POST("/addRoute")
+    Call<Results> addRoute(@Query("clientid") int clientId, @Query("trackingid") int trackingId);
 }

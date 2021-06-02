@@ -166,6 +166,8 @@ public class MapWithListActivity extends AppCompatActivity {
 
         if ((flags & FLAG_SHOW_MY_ROUTES) == FLAG_SHOW_MY_ROUTES) {
 
+            Log.e(TAG, "FLAG = show my routes");
+
             // call api
             getClientPoints(adaptor, context, getClientID(context));
         }
