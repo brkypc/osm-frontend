@@ -74,6 +74,9 @@ public class TrackingService extends Service {
     private Location moreAccurateLocation;
     private static List<StatusListener> statusListeners;
 
+    private LocationManager locationManager;
+    private LocationListener locationListener = null;
+
     public TrackingService() {
     }
 
@@ -206,8 +209,8 @@ public class TrackingService extends Service {
 
         triggerListeners(START_TRACKING);
 
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
+        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 TrackingItem item = new TrackingItem(location);
@@ -267,6 +270,10 @@ public class TrackingService extends Service {
         LocalObjectStorage<TrackingItem> storage = new LocalObjectStorage<>();
         storage.deleteList(SHARED_PREFS_POINTS_FILE, context);
 
+        if (locationListener != null) {
+            locationManager.removeUpdates(locationListener);
+        }
+
         triggerListeners(STOP_TRACKING);
         // TODO save to database
 
@@ -308,6 +315,8 @@ public class TrackingService extends Service {
                 }
             });
         }, 2000);
+
+        points = new ArrayList<>();
     }
 
     private void idleTracking(Context context) {
