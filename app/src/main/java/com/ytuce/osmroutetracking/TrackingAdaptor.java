@@ -5,10 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.ytuce.osmroutetracking.api.Results;
+import com.ytuce.osmroutetracking.utility.TimeHelper;
 
 import java.util.List;
 
@@ -17,14 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class TrackingAdaptor extends RecyclerView.Adapter<TrackingAdaptor.ViewHolder> {
 
-    private Context context;
+    private final Context context;
     private List<Results> trackingList;
-    private TrackingSelectionListener trackingSelectionListener;
-
-    public TrackingAdaptor(Context context, List<Results> trackingList) {
-        this.context = context;
-        this.trackingList = trackingList;
-    }
+    private final TrackingSelectionListener trackingSelectionListener;
 
     public TrackingAdaptor(Context context, TrackingSelectionListener listener) {
         this.context = context;
@@ -47,16 +42,13 @@ public class TrackingAdaptor extends RecyclerView.Adapter<TrackingAdaptor.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Results results = trackingList.get(position);
         holder.trackingIdTextView.setText(String.valueOf(results.getTrackingId()));
-        holder.trackingTimeTextView.setText(String.valueOf(results.getTime()));
+        holder.trackingTimeTextView.setText(TimeHelper.timestampToDate(results.getTime()));
 
-        holder.trackingCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    trackingSelectionListener.addTracking(results.getTrackingId());
-                } else {
-                    trackingSelectionListener.deleteTracking(results.getTrackingId());
-                }
+        holder.trackingCheckBox.setOnCheckedChangeListener((compoundButton, b) -> {
+            if (b) {
+                trackingSelectionListener.addTracking(results.getTrackingId());
+            } else {
+                trackingSelectionListener.deleteTracking(results.getTrackingId());
             }
         });
     }
@@ -74,7 +66,7 @@ public class TrackingAdaptor extends RecyclerView.Adapter<TrackingAdaptor.ViewHo
         notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView trackingIdTextView;
         public TextView trackingTimeTextView;
@@ -82,9 +74,9 @@ public class TrackingAdaptor extends RecyclerView.Adapter<TrackingAdaptor.ViewHo
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            trackingIdTextView = (TextView) itemView.findViewById(R.id.textView_trackingId);
-            trackingTimeTextView = (TextView) itemView.findViewById(R.id.textView_trackingTime);
-            trackingCheckBox = (CheckBox) itemView.findViewById(R.id.checkBox_trackingCheck);
+            trackingIdTextView = itemView.findViewById(R.id.textView_trackingId);
+            trackingTimeTextView = itemView.findViewById(R.id.textView_trackingTime);
+            trackingCheckBox = itemView.findViewById(R.id.checkBox_trackingCheck);
         }
     }
 }
