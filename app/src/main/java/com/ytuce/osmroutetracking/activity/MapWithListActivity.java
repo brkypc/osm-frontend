@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 
 import com.ytuce.osmroutetracking.R;
 import com.ytuce.osmroutetracking.TrackingAdaptor;
@@ -34,6 +35,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +47,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import retrofit2.Call;
@@ -75,10 +78,13 @@ public class MapWithListActivity extends AppCompatActivity {
 
     private ArrayList<Integer> ids;
     private MapserverTileSource tileSource;
+    private Calendar pickedDateTime;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        pickedDateTime = Calendar.getInstance();
 
         Intent currentIntent = getIntent();
         String mapMode = currentIntent.getStringExtra(MAP_MODE_INTENT_NAME);
@@ -178,6 +184,10 @@ public class MapWithListActivity extends AppCompatActivity {
             // call api
             getClientPoints(adaptor, context, getClientID(context));
         }
+
+        /*  if date time picker is needed
+        showDatePickerDialog();
+         */
     }
 
     @Override
@@ -379,5 +389,26 @@ public class MapWithListActivity extends AppCompatActivity {
                 }
             }, 1500);
         }
+    }
+
+    public void showTimePickerDialog() {
+        DialogFragment newFragment = new DateTimePicker.TimePickerFragment(this);
+        newFragment.show(getSupportFragmentManager(), "timePicker");
+    }
+
+    private void showDatePickerDialog() {
+        DialogFragment newFragment = new DateTimePicker.DatePickerFragment(this);
+        newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    public void setCalendar(int year, int month, int day) {
+        pickedDateTime.set(year, month, day);
+    }
+
+    public void setCalendar(int hour, int minute) {
+        pickedDateTime.set(Calendar.HOUR, hour);
+        pickedDateTime.set(Calendar.MINUTE, minute);
+        Log.e(TAG, pickedDateTime.toString());
+        Log.e(TAG, "picked time to timestamp = " + pickedDateTime.getTimeInMillis());
     }
 }
