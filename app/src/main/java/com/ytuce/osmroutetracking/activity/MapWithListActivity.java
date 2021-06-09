@@ -16,6 +16,7 @@ import com.ytuce.osmroutetracking.TrackingAdaptor;
 import com.ytuce.osmroutetracking.api.Results;
 import com.ytuce.osmroutetracking.api.RetrofitClient;
 import com.ytuce.osmroutetracking.map.ClientFilterTileSource;
+import com.ytuce.osmroutetracking.map.MapClickListener;
 import com.ytuce.osmroutetracking.map.MapserverTileSource;
 import com.ytuce.osmroutetracking.map.TileSourceFactory;
 import com.ytuce.osmroutetracking.map.TrackingFilterTileSource;
@@ -25,6 +26,7 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
@@ -137,6 +139,11 @@ public class MapWithListActivity extends AppCompatActivity {
         scaleBarOverlay.setCentred(true);
         scaleBarOverlay.setScaleBarOffset(displayMetrics.widthPixels / 2, 10);
         map.getOverlays().add(scaleBarOverlay);
+
+        /*  map click listener usage
+        MapEventsOverlay mapClicksOverlay = new MapEventsOverlay(new MapClickListener());
+        map.getOverlays().add(mapClicksOverlay);
+         */
 
         clearMapCache(false);
 
