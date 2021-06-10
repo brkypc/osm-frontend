@@ -12,5 +12,4 @@ public class TimeHelper {
         Date date = new Date(timestamp);
         return format.format(date);
     }
-
 }
