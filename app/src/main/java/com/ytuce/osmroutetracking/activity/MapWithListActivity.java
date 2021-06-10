@@ -20,6 +20,7 @@ import com.ytuce.osmroutetracking.TrackingAdaptor;
 import com.ytuce.osmroutetracking.api.Results;
 import com.ytuce.osmroutetracking.api.RetrofitClient;
 import com.ytuce.osmroutetracking.map.ClientFilterTileSource;
+import com.ytuce.osmroutetracking.map.MapClickListener;
 import com.ytuce.osmroutetracking.map.MapserverTileSource;
 import com.ytuce.osmroutetracking.map.TileSourceFactory;
 import com.ytuce.osmroutetracking.map.TrackingFilterTileSource;
@@ -27,9 +28,11 @@ import com.ytuce.osmroutetracking.utility.TimeHelper;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
@@ -38,13 +41,11 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
-import java.util.TimeZone;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -75,6 +76,7 @@ public class MapWithListActivity extends AppCompatActivity {
 
     public static final int FLAG_SHOW_MY_ROUTES = 0b1;
     public static final int FLAG_SHOW_TIME_INTERVAL_SELECTION = 0b10;
+    public static final int FLAG_LISTEN_MAP_CLICK = 0b100;
 
     private final String TAG = "MapWithListActivity";
 
@@ -86,8 +88,8 @@ public class MapWithListActivity extends AppCompatActivity {
     private MapserverTileSource tileSource;
     private Calendar pickedDateTime;
     private boolean choosingStartTime; // false if choosing end time in time interval selection
-    private long startTimeTimestamp;
-    private long endTimeTimestamp;
+    private long startTimeTimestamp = -1;
+    private long endTimeTimestamp = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -156,11 +158,6 @@ public class MapWithListActivity extends AppCompatActivity {
         scaleBarOverlay.setScaleBarOffset(displayMetrics.widthPixels / 2, 10);
         map.getOverlays().add(scaleBarOverlay);
 
-        /*  map click listener usage
-        MapEventsOverlay mapClicksOverlay = new MapEventsOverlay(new MapClickListener());
-        map.getOverlays().add(mapClicksOverlay);
-         */
-
         clearMapCache(false);
 
         // when tracking selection changes
@@ -193,13 +190,15 @@ public class MapWithListActivity extends AppCompatActivity {
             getClientPoints(adaptor, context, getClientID(context));
         }
 
-        if ((flags & FLAG_SHOW_TIME_INTERVAL_SELECTION) == FLAG_SHOW_TIME_INTERVAL_SELECTION) {
+        boolean timeIntervalSearch = (
+                (flags & FLAG_SHOW_TIME_INTERVAL_SELECTION) == FLAG_SHOW_TIME_INTERVAL_SELECTION);
+        if (timeIntervalSearch) {
             setIntervalSelectionLayout();
         }
 
-        /*  if date time picker is needed
-        showDatePickerDialog();
-         */
+        if ((flags & FLAG_LISTEN_MAP_CLICK) == FLAG_LISTEN_MAP_CLICK) {
+            listenMapClicks(adaptor, timeIntervalSearch);
+        }
     }
 
     @Override
@@ -452,5 +451,68 @@ public class MapWithListActivity extends AppCompatActivity {
             endTimeTimestamp = pickedDateTime.getTimeInMillis();
             endTimeTextView.setText(TimeHelper.timestampToDate(endTimeTimestamp));
         }
+    }
+
+    private void listenMapClicks(TrackingAdaptor trackingAdaptor, boolean timeInterval) {
+        MapEventsOverlay mapClicksOverlay = new MapEventsOverlay(new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                if (timeInterval) {
+                    getClosestPointsWithTimeInterval(p, trackingAdaptor);
+                } else {
+                    getClosestPoints(p, trackingAdaptor);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean longPressHelper(GeoPoint p) {
+                return false;
+            }
+        });
+        map.getOverlays().add(mapClicksOverlay);
+    }
+
+    public void getClosestPoints(GeoPoint point, TrackingAdaptor trackingAdaptor) {
+        Call<List<Results>> call = RetrofitClient.getInstance().getApi()
+                .getRoutesClosePoint(point.getLatitude(), point.getLongitude());
+
+        call.enqueue(new Callback<List<Results>>() {
+            @Override
+            public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
+                trackingAdaptor.setTrackingList(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Results>> call, Throwable t) {
+                Log.e("RestService", "(getRotesClosePoint) " + t.getMessage());
+            }
+        });
+    }
+
+    public void getClosestPointsWithTimeInterval(GeoPoint point, TrackingAdaptor trackingAdaptor) {
+
+        Call<List<Results>> call;
+
+        if (startTimeTimestamp != -1 && endTimeTimestamp != -1) {
+
+            call = RetrofitClient.getInstance().getApi()
+                    .getRoutesClosePointTimeInterval(point.getLatitude(), point.getLongitude(),
+                            startTimeTimestamp, endTimeTimestamp);
+        } else {
+            return;
+        }
+
+        call.enqueue(new Callback<List<Results>>() {
+            @Override
+            public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
+                trackingAdaptor.setTrackingList(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Results>> call, Throwable t) {
+                Log.e("RestService", "(getRotesClosePoint) " + t.getMessage());
+            }
+        });
     }
 }

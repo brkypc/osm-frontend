@@ -92,7 +92,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showRoutesNearToPint(View view) {
-
+        Intent intent = new Intent(this, MapWithListActivity.class);
+        intent.putExtra(
+                MapWithListActivity.MAP_MODE_INTENT_NAME, MapWithListActivity.TRACKING_FILTER);
+        intent.putExtra(
+                MapWithListActivity.FLAGS_INTENT_NAME, MapWithListActivity.FLAG_LISTEN_MAP_CLICK);
+        startActivity(intent);
     }
 
     public void showRoutesNearToPintWithTimeInterval(View view) {
@@ -100,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(
                 MapWithListActivity.MAP_MODE_INTENT_NAME, MapWithListActivity.TRACKING_FILTER);
         intent.putExtra(MapWithListActivity.FLAGS_INTENT_NAME,
-                MapWithListActivity.FLAG_SHOW_TIME_INTERVAL_SELECTION);
+                MapWithListActivity.FLAG_SHOW_TIME_INTERVAL_SELECTION |
+                        MapWithListActivity.FLAG_LISTEN_MAP_CLICK);
         startActivity(intent);
     }
 
