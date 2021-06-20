@@ -21,4 +21,14 @@ public interface Api {
 
     @POST("/addRoute")
     Call<Results> addRoute(@Query("clientid") int clientId, @Query("trackingid") int trackingId);
+
+    @GET("/getRoutesClosePoint")
+    Call<List<Results>> getRoutesClosePoint(
+            @Query("latitude") double latitude, @Query("longitude") double longitude);
+
+    @GET("/getRoutesClosePointTimeInterval")
+    Call<List<Results>> getRoutesClosePointTimeInterval(
+            @Query("latitude") double latitude, @Query("longitude") double longitude,
+            @Query("start") long startTime, @Query("end") long endTime);
+
 }
