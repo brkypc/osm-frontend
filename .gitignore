@@ -13,3 +13,5 @@ android-app/captures
 android-app/.externalNativeBuild
 android-app/.cxx
 android-app/local.properties
+desktop-admin/target
+desktop-admin/.idea
