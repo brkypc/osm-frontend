@@ -2,6 +2,7 @@ package gui;
 
 import api.Consumer;
 import api.TrackingModel;
+import org.jxmapviewer.JXMapKit;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.DefaultTileFactory;
 import org.jxmapviewer.viewer.GeoPosition;
@@ -10,8 +11,9 @@ import tile.MapserverTileFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Point2D;
 import java.util.List;
 
 public class MainScreen {
@@ -19,7 +21,7 @@ public class MainScreen {
     private static final String baseUrl =
             "http://localhost/cgi-bin/mapserv.exe?mode=tile&template=openlayers&layers=all&map=D:/ms4w/apps/osm/basemaps/osm-google.map&tilemode=gmap";
 
-    private Consumer consumer;
+    private final Consumer consumer;
 
     public MainScreen() {
         consumer = new Consumer();
@@ -31,25 +33,21 @@ public class MainScreen {
     }
 
     private void setMapView(JFrame frame) {
-        JXMapViewer mapViewer = new JXMapViewer();
 
-        // TileFactoryInfo tileFactoryInfo = new OSMTileFactoryInfo("mapserver", baseUrl);
-        TileFactoryInfo tileFactoryInfo = new MapserverTileFactory("asd", baseUrl, "1");
-        // ((WMSTileFactoryInfo) tileFactoryInfo).setTileFormat("png");
-        DefaultTileFactory defaultTileFactory = new DefaultTileFactory(tileFactoryInfo);
-        mapViewer.setTileFactory(defaultTileFactory);
-
-        defaultTileFactory.setThreadPoolSize(8);
+        JXMapKit mapKit = new JXMapKit();
+        TileFactoryInfo info = new MapserverTileFactory("asd", baseUrl, "1");
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        mapKit.setTileFactory(tileFactory);
 
         GeoPosition istanbul = new GeoPosition(41.015137, 28.979530);
 
-        mapViewer.setZoom(7);
-        mapViewer.setAddressLocation(istanbul);
-        mapViewer.setPanEnabled(true);
-        mapViewer.setSize(800, 600);
-        mapViewer.setPreferredSize(new Dimension(800, 600));
+        mapKit.setZoom(11);
+        mapKit.setAddressLocation(istanbul);
 
-        frame.add(mapViewer, BorderLayout.EAST);
+        mapKit.setSize(800, 600);
+        mapKit.setPreferredSize(new Dimension(800, 600));
+
+        frame.add(mapKit, BorderLayout.EAST);
     }
 
     private void setSideMenu(JFrame frame) {
@@ -76,22 +74,19 @@ public class MainScreen {
         JButton showRoutesNearToPoint = new JButton("Bir noktaya en yakın rotalar");
         JButton showRoutesNearToPointTimeInterval = new JButton("Zaman aralığında noktaya en yakın rotalar");
 
-        showUserRoutes.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String input = JOptionPane.showInputDialog("Client ID:");
-                int clientId = Integer.parseInt(input);
+        showUserRoutes.addActionListener(e -> {
+            String input = JOptionPane.showInputDialog("Client ID:");
+            int clientId = Integer.parseInt(input);
 
-                List<TrackingModel> resultSet = consumer.getPointsOfClient(clientId);
+            List<TrackingModel> resultSet = consumer.getPointsOfClient(clientId);
 
-                DefaultListModel<TrackingModel> defaultListModel = new DefaultListModel<>();
+            DefaultListModel<TrackingModel> defaultListModel = new DefaultListModel<>();
 
-                for (TrackingModel trackingModel : resultSet) {
-                    defaultListModel.addElement(trackingModel);
-                    System.out.println(trackingModel.toString());
-                }
-                list.setModel(defaultListModel);
+            for (TrackingModel trackingModel : resultSet) {
+                defaultListModel.addElement(trackingModel);
+                System.out.println(trackingModel.toString());
             }
+            list.setModel(defaultListModel);
         });
 
         controlPanel.add(showAllRoutes);
