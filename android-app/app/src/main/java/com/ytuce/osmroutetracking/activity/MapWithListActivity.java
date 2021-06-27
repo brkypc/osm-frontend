@@ -33,6 +33,7 @@ import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
@@ -90,6 +91,7 @@ public class MapWithListActivity extends AppCompatActivity {
     private boolean choosingStartTime; // false if choosing end time in time interval selection
     private long startTimeTimestamp = -1;
     private long endTimeTimestamp = -1;
+    private Marker marker = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -462,6 +464,19 @@ public class MapWithListActivity extends AppCompatActivity {
                 } else {
                     getClosestPoints(p, trackingAdaptor);
                 }
+
+                boolean added = false;
+                if (marker == null) {
+                    marker = new Marker(map);
+                } else {
+                    added = true;
+                }
+                marker.setPosition(p);
+                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                if (!added) {
+                    map.getOverlays().add(marker);
+                }
+
                 return false;
             }
 
