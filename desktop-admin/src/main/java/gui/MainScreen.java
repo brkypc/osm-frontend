@@ -4,19 +4,17 @@ import api.Consumer;
 import api.TrackingModel;
 import javafx.util.Pair;
 import org.jxmapviewer.JXMapKit;
+import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.input.MapClickListener;
-import org.jxmapviewer.viewer.DefaultTileFactory;
-import org.jxmapviewer.viewer.GeoPosition;
-import org.jxmapviewer.viewer.TileFactory;
-import org.jxmapviewer.viewer.TileFactoryInfo;
-import tile.MapserverTileFactory;
+import org.jxmapviewer.painter.CompoundPainter;
+import org.jxmapviewer.viewer.*;
 import tile.TileFactoryInfoBuilder;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 public class MainScreen {
@@ -26,6 +24,7 @@ public class MainScreen {
 
     private static boolean timeSelection = false;
     private static Pair<Long, Long> timeInterval;
+    private static GeoPosition firstSelection = null;
 
     public MainScreen() {
         consumer = new Consumer();
@@ -76,19 +75,21 @@ public class MainScreen {
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
         controlPanel.setSize(400, 130);
-        controlPanel.setMaximumSize(new Dimension(400, 130));
-        controlPanel.setPreferredSize(new Dimension(400, 130));
+        controlPanel.setMaximumSize(new Dimension(400, 160));
+        controlPanel.setPreferredSize(new Dimension(400, 160));
 
         TrackingJList<TrackingModel> list = new TrackingJList<>();
         list.setCellRenderer(new TrackingRenderer());
         list.setSize(370, 470);
-        list.setMaximumSize(new Dimension(370, 470));
-        list.setPreferredSize(new Dimension(370, 470));
+        list.setMaximumSize(new Dimension(370, 440));
+        list.setPreferredSize(new Dimension(370, 440));
 
         JButton showAllRoutes = new JButton("Tüm rotalar");
         JButton showUserRoutes = new JButton("Bir kişinin rotaları");
         JButton showRoutesNearToPoint = new JButton("Bir noktaya en yakın rotalar");
         JButton showRoutesNearToPointTimeInterval = new JButton("Zaman aralığında noktaya en yakın rotalar");
+        JButton showRoutesInsideArea = new JButton("Alan içinde kalan rotalar");
+        JButton showRoutesInsideAreaTimeInterval = new JButton("Zaman aralığında alan içinde kalan rotalar");
 
         ListSelectionListener trackingSelectionListener = e -> {
 
@@ -125,6 +126,9 @@ public class MainScreen {
 
                 mapKit.setAddressLocation(location);
                 mapKit.setAddressLocationShown(true);
+                if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                    ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(true);
+                }
 
                 if (timeSelection)  {
                     if (timeInterval.getKey() != -1 && timeInterval.getValue() != -1) {
@@ -134,6 +138,50 @@ public class MainScreen {
                     }
                 } else {
                     list.setModel(consumer.getRoutesCloseToPoint(location.getLatitude(), location.getLongitude()));
+                }
+            }
+        };
+
+        MouseAdapter areaSelectionListener = new MapClickListener(mapKit.getMainMap()) {
+            @Override
+            public void mapClicked(GeoPosition location) {
+
+                if (firstSelection == null) {
+                    firstSelection = location;
+
+                    mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
+
+                    mapKit.setAddressLocation(location);
+                    mapKit.setAddressLocationShown(true);
+                    if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                        ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(true);
+                    }
+                } else {
+
+                    mapKit.setAddressLocationShown(false);
+                    if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                        ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
+                    }
+
+                    GeoPosition edge1 = new GeoPosition(firstSelection.getLatitude(), location.getLongitude());
+                    GeoPosition edge2 = new GeoPosition(location.getLatitude(), firstSelection.getLongitude());
+
+                    List<GeoPosition> edges = Arrays.asList(firstSelection, edge1, location, edge2, firstSelection);
+                    RoutePainter routePainter = new RoutePainter(edges);
+
+                    List<org.jxmapviewer.painter.Painter<JXMapViewer>> painters = new ArrayList<>();
+                    painters.add(routePainter);
+
+                    CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(painters);
+                    mapKit.getMainMap().setOverlayPainter(painter);
+
+                    if (timeSelection) {
+
+                    } else {
+
+                    }
+
+                    firstSelection = null;
                 }
             }
         };
@@ -154,7 +202,12 @@ public class MainScreen {
             mapKit.setTileFactory(tileFactory);
 
             mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+            mapKit.getMainMap().removeMouseListener(areaSelectionListener);
             mapKit.setAddressLocationShown(false);
+            mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
+            if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
+            }
         });
 
         showUserRoutes.addActionListener(e -> {
@@ -176,7 +229,12 @@ public class MainScreen {
             mapKit.setTileFactory(tileFactory);
 
             mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+            mapKit.getMainMap().removeMouseListener(areaSelectionListener);
             mapKit.setAddressLocationShown(false);
+            mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
+            if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
+            }
         });
 
         showRoutesNearToPoint.addActionListener(e -> {
@@ -194,6 +252,12 @@ public class MainScreen {
             mapKit.setTileFactory(tileFactory);
 
             mapKit.getMainMap().addMouseListener(pointSelectionListener);
+            mapKit.getMainMap().removeMouseListener(areaSelectionListener);
+            mapKit.setAddressLocationShown(false);
+            mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
+            if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
+            }
         });
 
         showRoutesNearToPointTimeInterval.addActionListener(e -> {
@@ -212,14 +276,69 @@ public class MainScreen {
                 mapKit.setTileFactory(tileFactory);
 
                 mapKit.getMainMap().addMouseListener(pointSelectionListener);
+                mapKit.getMainMap().removeMouseListener(areaSelectionListener);
+                mapKit.setAddressLocationShown(false);
+                mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
+                if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                    ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
+                }
             }
 
+        });
+
+        showRoutesInsideArea.addActionListener(e -> {
+
+            timeSelection = false;
+
+            JOptionPane.showMessageDialog(frame, "İki nokta seçin");
+
+            list.removeListSelectionListener(clientSelectionListener);
+            list.addListSelectionListener(trackingSelectionListener);
+
+            TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
+                    .build();
+            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            mapKit.setTileFactory(tileFactory);
+
+            mapKit.getMainMap().addMouseListener(areaSelectionListener);
+            mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+            mapKit.setAddressLocationShown(false);
+            mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
+            if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
+            }
+        });
+
+        showRoutesInsideAreaTimeInterval.addActionListener(e -> {
+            timeSelection = true;
+
+            timeInterval = TimeIntervalSelectionOptionPane.show();
+
+            if (timeInterval.getKey() != -1 && timeInterval.getValue() != -1) {
+                list.removeListSelectionListener(clientSelectionListener);
+                list.addListSelectionListener(trackingSelectionListener);
+
+                TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
+                        .build();
+                DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+                mapKit.setTileFactory(tileFactory);
+
+                mapKit.getMainMap().addMouseListener(areaSelectionListener);
+                mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+                mapKit.setAddressLocationShown(false);
+                mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
+                if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
+                    ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
+                }
+            }
         });
 
         controlPanel.add(showAllRoutes);
         controlPanel.add(showUserRoutes);
         controlPanel.add(showRoutesNearToPoint);
         controlPanel.add(showRoutesNearToPointTimeInterval);
+        controlPanel.add(showRoutesInsideArea);
+        controlPanel.add(showRoutesInsideAreaTimeInterval);
 
         sideMenuPanel.add(controlPanel);
         sideMenuPanel.add(new JScrollPane(list));
