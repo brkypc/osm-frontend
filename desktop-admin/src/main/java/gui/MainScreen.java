@@ -176,9 +176,16 @@ public class MainScreen {
                     mapKit.getMainMap().setOverlayPainter(painter);
 
                     if (timeSelection) {
-
+                        if (timeInterval.getKey() != -1 && timeInterval.getValue() != -1) {
+                            list.setModel(consumer.getRoutesInsideAreaTimeInterval(
+                                    firstSelection.getLatitude(), firstSelection.getLongitude(),
+                                    location.getLatitude(), location.getLongitude(),
+                                    timeInterval.getKey(), timeInterval.getValue()));
+                        }
                     } else {
-
+                        list.setModel(consumer.getRoutesInsideArea(
+                                firstSelection.getLatitude(), firstSelection.getLongitude(),
+                                location.getLatitude(), location.getLongitude()));
                     }
 
                     firstSelection = null;

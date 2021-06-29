@@ -69,4 +69,38 @@ public class Consumer {
             return new ArrayList<>();
         }
     }
+
+    public List<TrackingModel> getRoutesInsideArea(
+            double  latitude1, double longitude1, double latitude2, double longitude2) {
+        URI requestUri = UriComponentsBuilder.fromUriString(BASE_URL).path("/getRoutesInsideArea")
+                .queryParam("latitude1", latitude1)
+                .queryParam("longitude1", longitude1)
+                .queryParam("latitude2", latitude2)
+                .queryParam("longitude2", longitude2).build().encode().toUri();
+
+        ResponseEntity<TrackingModel[]> responseEntity = restTemplate.getForEntity(requestUri, TrackingModel[].class);
+        if (responseEntity.getBody() != null) {
+            return Arrays.asList(responseEntity.getBody());
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    public List<TrackingModel> getRoutesInsideAreaTimeInterval(
+            double  latitude1, double longitude1, double latitude2, double longitude2, long startTime, long endTime) {
+        URI requestUri = UriComponentsBuilder.fromUriString(BASE_URL).path("/getRoutesInsideAreaTimeInterval")
+                .queryParam("latitude1", latitude1)
+                .queryParam("longitude1", longitude1)
+                .queryParam("latitude2", latitude2)
+                .queryParam("longitude2", longitude2)
+                .queryParam("start", startTime)
+                .queryParam("end", endTime).build().encode().toUri();
+
+        ResponseEntity<TrackingModel[]> responseEntity = restTemplate.getForEntity(requestUri, TrackingModel[].class);
+        if (responseEntity.getBody() != null) {
+            return Arrays.asList(responseEntity.getBody());
+        } else {
+            return new ArrayList<>();
+        }
+    }
 }
