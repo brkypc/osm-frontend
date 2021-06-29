@@ -10,10 +10,7 @@ public class MapserverTileFactory extends GoogleMapsTileFactoryInfo {
 
     @Override
     public String getTileUrl(int x, int y, int zoom) {
-        System.out.println("testing for validity: X " + x + " Y = " + y);
-
         zoom = getTotalMapZoom() - zoom;
-
         return baseURL + "&tile=" + x + "+" + y + "+" + zoom;
     }
 }

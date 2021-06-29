@@ -110,6 +110,16 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void showRoutesInsideArea(View view) {
+        Intent intent = new Intent(this, MapWithListActivity.class);
+        intent.putExtra(
+                MapWithListActivity.MAP_MODE_INTENT_NAME, MapWithListActivity.TRACKING_FILTER);
+        intent.putExtra(MapWithListActivity.FLAGS_INTENT_NAME,
+                MapWithListActivity.FLAG_LISTEN_AREA_SELECTION |
+                        MapWithListActivity.FLAG_LISTEN_MAP_CLICK);
+        startActivity(intent);
+    }
+
     private void startTrackingService() {
         Intent trackingServiceIntent = new Intent(this, TrackingService.class);
         trackingServiceIntent.putExtra(TrackingService.INTENT_STRING_EXTRA, TrackingService.IDLE_TRACKING);

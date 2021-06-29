@@ -33,6 +33,8 @@ import org.osmdroid.tileprovider.modules.SqlTileWriter;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
@@ -40,6 +42,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -62,6 +65,8 @@ import retrofit2.Response;
 public class MapWithListActivity extends AppCompatActivity {
 
     private final int REQUEST_PERMISSIONS_REQUEST_CODE = 2001;
+    private final int MAP_MARKER_OVERLAY_ID = 4;
+    private final int MAP_POLYGON_OVERLAY_ID = 5;
 
     private static final String SHARED_PREFS_ID_FILE = "client_id";
     private static final String ID_KEY = "id";
@@ -77,6 +82,7 @@ public class MapWithListActivity extends AppCompatActivity {
     public static final int FLAG_SHOW_MY_ROUTES = 0b1;
     public static final int FLAG_SHOW_TIME_INTERVAL_SELECTION = 0b10;
     public static final int FLAG_LISTEN_MAP_CLICK = 0b100;
+    public static final int FLAG_LISTEN_AREA_SELECTION = 0b1100;
 
     private final String TAG = "MapWithListActivity";
 
@@ -90,6 +96,10 @@ public class MapWithListActivity extends AppCompatActivity {
     private boolean choosingStartTime; // false if choosing end time in time interval selection
     private long startTimeTimestamp = -1;
     private long endTimeTimestamp = -1;
+    private Marker marker = null;
+    private int selectedPointCount = 0;
+    private GeoPoint firstSelectedPoint;
+    private Polygon polygon = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -197,7 +207,8 @@ public class MapWithListActivity extends AppCompatActivity {
         }
 
         if ((flags & FLAG_LISTEN_MAP_CLICK) == FLAG_LISTEN_MAP_CLICK) {
-            listenMapClicks(adaptor, timeIntervalSearch);
+            listenMapClicks(adaptor, timeIntervalSearch,
+                    (flags & FLAG_LISTEN_AREA_SELECTION) == FLAG_LISTEN_AREA_SELECTION);
         }
     }
 
@@ -453,15 +464,66 @@ public class MapWithListActivity extends AppCompatActivity {
         }
     }
 
-    private void listenMapClicks(TrackingAdaptor trackingAdaptor, boolean timeInterval) {
+    private void listenMapClicks(TrackingAdaptor trackingAdaptor, boolean timeInterval,
+                                 boolean areaSelection) {
         MapEventsOverlay mapClicksOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                if (timeInterval) {
-                    getClosestPointsWithTimeInterval(p, trackingAdaptor);
-                } else {
-                    getClosestPoints(p, trackingAdaptor);
+                if (!areaSelection) {
+                    if (timeInterval) {
+                        getClosestPointsWithTimeInterval(p, trackingAdaptor);
+                    } else {
+                        getClosestPoints(p, trackingAdaptor);
+                    }
                 }
+
+                if (!areaSelection || selectedPointCount == 0 || selectedPointCount == 2) {
+
+                    boolean added = false;
+                    if (marker == null) {
+                        marker = new Marker(map);
+                    } else {
+                        added = true;
+                    }
+                    marker.setPosition(p);
+                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                    if (!added) {
+                        map.getOverlays().add(MAP_MARKER_OVERLAY_ID, marker);
+                    }
+
+                    selectedPointCount = 1;
+                    firstSelectedPoint = p;
+                    polygon = null;
+                    try {
+                        map.getOverlays().remove(MAP_POLYGON_OVERLAY_ID);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (selectedPointCount == 1) {
+
+                    GeoPoint edge1 = new GeoPoint(p.getLatitude(), firstSelectedPoint.getLongitude());
+                    GeoPoint edge2 = new GeoPoint(firstSelectedPoint.getLatitude(), p.getLongitude());
+
+                    boolean added = false;
+                    if (polygon == null) {
+                        polygon = new Polygon();
+                    } else {
+                        added = true;
+                    }
+                    polygon.setPoints(new ArrayList<>(Arrays.asList(
+                            firstSelectedPoint, edge1, p, edge2
+                    )));
+                    polygon.getFillPaint().setARGB(100, 255, 0, 0);
+                    if (!added) {
+                        map.getOverlays().add(MAP_POLYGON_OVERLAY_ID, polygon);
+                    }
+
+                    map.getOverlays().remove(MAP_MARKER_OVERLAY_ID);
+
+                    marker = null;
+                    selectedPointCount = 2;
+                }
+
                 return false;
             }
 
