@@ -466,6 +466,7 @@ public class MapWithListActivity extends AppCompatActivity {
     }
 
     private void listenMapClicks(TrackingAdaptor trackingAdaptor, boolean timeInterval,
+
                                  boolean areaSelection, Context context) {
         MapEventsOverlay mapClicksOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
