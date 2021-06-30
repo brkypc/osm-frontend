@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Button goMapButton;
     private TextView serviceStatusTextView;
     private ProgressBar progressBar;
 
@@ -40,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
 
         EnvironmentVariables.set();
 
-        goMapButton = findViewById(R.id.button_goMap);
         serviceStatusTextView = findViewById(R.id.textView_ServiceStatus);
         progressBar = findViewById(R.id.progressBar);
 

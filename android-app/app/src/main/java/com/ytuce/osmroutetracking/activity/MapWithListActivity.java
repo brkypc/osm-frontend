@@ -208,7 +208,8 @@ public class MapWithListActivity extends AppCompatActivity {
 
         if ((flags & FLAG_LISTEN_MAP_CLICK) == FLAG_LISTEN_MAP_CLICK) {
             listenMapClicks(adaptor, timeIntervalSearch,
-                    (flags & FLAG_LISTEN_AREA_SELECTION) == FLAG_LISTEN_AREA_SELECTION);
+                    (flags & FLAG_LISTEN_AREA_SELECTION) == FLAG_LISTEN_AREA_SELECTION,
+                    context);
         }
     }
 
@@ -465,15 +466,15 @@ public class MapWithListActivity extends AppCompatActivity {
     }
 
     private void listenMapClicks(TrackingAdaptor trackingAdaptor, boolean timeInterval,
-                                 boolean areaSelection) {
+                                 boolean areaSelection, Context context) {
         MapEventsOverlay mapClicksOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
                 if (!areaSelection) {
                     if (timeInterval) {
-                        getClosestPointsWithTimeInterval(p, trackingAdaptor);
+                        getClosestPointsWithTimeInterval(p, trackingAdaptor, context);
                     } else {
-                        getClosestPoints(p, trackingAdaptor);
+                        getClosestPoints(p, trackingAdaptor, context);
                     }
                 }
 
@@ -524,9 +525,9 @@ public class MapWithListActivity extends AppCompatActivity {
                     selectedPointCount = 2;
 
                     if (timeInterval) {
-                        getRoutesInsideAreaTimeInterval(p, trackingAdaptor);
+                        getRoutesInsideAreaTimeInterval(p, trackingAdaptor, context);
                     } else {
-                        getRoutesInsideArea(p, trackingAdaptor);
+                        getRoutesInsideArea(p, trackingAdaptor, context);
                     }
                 }
 
@@ -541,9 +542,9 @@ public class MapWithListActivity extends AppCompatActivity {
         map.getOverlays().add(mapClicksOverlay);
     }
 
-    public void getClosestPoints(GeoPoint point, TrackingAdaptor trackingAdaptor) {
+    public void getClosestPoints(GeoPoint point, TrackingAdaptor trackingAdaptor, Context context) {
         Call<List<Results>> call = RetrofitClient.getInstance().getApi()
-                .getRoutesClosePoint(point.getLatitude(), point.getLongitude());
+                .getRoutesClosePoint(point.getLatitude(), point.getLongitude(), getClientID(context));
 
         call.enqueue(new Callback<List<Results>>() {
             @Override
@@ -558,7 +559,7 @@ public class MapWithListActivity extends AppCompatActivity {
         });
     }
 
-    public void getClosestPointsWithTimeInterval(GeoPoint point, TrackingAdaptor trackingAdaptor) {
+    public void getClosestPointsWithTimeInterval(GeoPoint point, TrackingAdaptor trackingAdaptor, Context context) {
 
         Call<List<Results>> call;
 
@@ -566,7 +567,7 @@ public class MapWithListActivity extends AppCompatActivity {
 
             call = RetrofitClient.getInstance().getApi()
                     .getRoutesClosePointTimeInterval(point.getLatitude(), point.getLongitude(),
-                            startTimeTimestamp, endTimeTimestamp);
+                            startTimeTimestamp, endTimeTimestamp, getClientID(context));
         } else {
             return;
         }
@@ -584,11 +585,13 @@ public class MapWithListActivity extends AppCompatActivity {
         });
     }
 
-    public void getRoutesInsideArea(GeoPoint secondSelectedPoint, TrackingAdaptor trackingAdaptor) {
+    public void getRoutesInsideArea(GeoPoint secondSelectedPoint, TrackingAdaptor trackingAdaptor,
+                                    Context context) {
 
         Call<List<Results>> call = RetrofitClient.getInstance().getApi().getRoutesInsideArea(
                 firstSelectedPoint.getLatitude(), firstSelectedPoint.getLongitude(),
-                secondSelectedPoint.getLatitude(), secondSelectedPoint.getLongitude());
+                secondSelectedPoint.getLatitude(), secondSelectedPoint.getLongitude(),
+                getClientID(context));
 
         call.enqueue(new Callback<List<Results>>() {
             @Override
@@ -603,7 +606,8 @@ public class MapWithListActivity extends AppCompatActivity {
         });
     }
 
-    public void getRoutesInsideAreaTimeInterval(GeoPoint secondSelectedPoint, TrackingAdaptor trackingAdaptor) {
+    public void getRoutesInsideAreaTimeInterval(GeoPoint secondSelectedPoint, TrackingAdaptor trackingAdaptor,
+                                                Context context) {
 
         Call<List<Results>> call;
 
@@ -611,7 +615,8 @@ public class MapWithListActivity extends AppCompatActivity {
             call = RetrofitClient.getInstance().getApi().getRoutesInsideAreaTimeInterval(
                     firstSelectedPoint.getLatitude(), firstSelectedPoint.getLongitude(),
                     secondSelectedPoint.getLatitude(), secondSelectedPoint.getLongitude(),
-                    startTimeTimestamp, endTimeTimestamp);
+                    startTimeTimestamp, endTimeTimestamp,
+                    getClientID(context));
         } else {
             return;
         }
