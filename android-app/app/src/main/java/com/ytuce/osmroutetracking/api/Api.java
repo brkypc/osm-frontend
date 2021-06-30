@@ -31,4 +31,15 @@ public interface Api {
             @Query("latitude") double latitude, @Query("longitude") double longitude,
             @Query("start") long startTime, @Query("end") long endTime);
 
+    @GET("/getRoutesInsideArea")
+    Call<List<Results>> getRoutesInsideArea(
+            @Query("latitude1") double latitude1, @Query("longitude1") double longitude1,
+            @Query("latitude2") double latitude2, @Query("longitude2") double longitude2);
+
+    @GET("/getRoutesInsideAreaTimeInterval")
+    Call<List<Results>> getRoutesInsideAreaTimeInterval(
+            @Query("latitude1") double latitude1, @Query("longitude1") double longitude1,
+            @Query("latitude2") double latitude2, @Query("longitude2") double longitude2,
+            @Query("start") long startTime, @Query("end") long endTime);
+
 }

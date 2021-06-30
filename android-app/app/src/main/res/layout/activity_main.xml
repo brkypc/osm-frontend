@@ -21,7 +21,7 @@
         android:id="@+id/button_goMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="23dp"
+        android:layout_marginTop="10dp"
         android:onClick="goMap"
         android:text="Tüm Rotaları Göster"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,10 +83,20 @@
         android:id="@+id/button_insideArea"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="showRoutesInsideArea"
         android:text="Alan içinde kalan rotalar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_nearToPointWithTimeInterval"
-        android:onClick="showRoutesInsideArea"/>
+        app:layout_constraintTop_toBottomOf="@+id/button_nearToPointWithTimeInterval" />
+
+    <Button
+        android:id="@+id/button_insideAreaTimeInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="showRoutesInsideAreaTimeInterval"
+        android:text="Zaman aralığında alan içinde kalan rotalar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_insideArea" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
