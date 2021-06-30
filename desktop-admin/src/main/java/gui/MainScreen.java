@@ -172,7 +172,7 @@ public class MainScreen {
                     List<org.jxmapviewer.painter.Painter<JXMapViewer>> painters = new ArrayList<>();
                     painters.add(routePainter);
 
-                    CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(painters);
+                    CompoundPainter<JXMapViewer> painter = new CompoundPainter<>(painters);
                     mapKit.getMainMap().setOverlayPainter(painter);
 
                     if (timeSelection) {
@@ -258,8 +258,9 @@ public class MainScreen {
             DefaultTileFactory tileFactory = new DefaultTileFactory(info);
             mapKit.setTileFactory(tileFactory);
 
-            mapKit.getMainMap().addMouseListener(pointSelectionListener);
             mapKit.getMainMap().removeMouseListener(areaSelectionListener);
+            mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+            mapKit.getMainMap().addMouseListener(pointSelectionListener);
             mapKit.setAddressLocationShown(false);
             mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
             if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
@@ -282,8 +283,9 @@ public class MainScreen {
                 DefaultTileFactory tileFactory = new DefaultTileFactory(info);
                 mapKit.setTileFactory(tileFactory);
 
-                mapKit.getMainMap().addMouseListener(pointSelectionListener);
                 mapKit.getMainMap().removeMouseListener(areaSelectionListener);
+                mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+                mapKit.getMainMap().addMouseListener(pointSelectionListener);
                 mapKit.setAddressLocationShown(false);
                 mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
                 if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
@@ -307,13 +309,16 @@ public class MainScreen {
             DefaultTileFactory tileFactory = new DefaultTileFactory(info);
             mapKit.setTileFactory(tileFactory);
 
-            mapKit.getMainMap().addMouseListener(areaSelectionListener);
             mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+            mapKit.getMainMap().removeMouseListener(areaSelectionListener);
+            mapKit.getMainMap().addMouseListener(areaSelectionListener);
             mapKit.setAddressLocationShown(false);
             mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
             if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
                 ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
             }
+
+            firstSelection = null;
         });
 
         showRoutesInsideAreaTimeInterval.addActionListener(e -> {
@@ -330,13 +335,16 @@ public class MainScreen {
                 DefaultTileFactory tileFactory = new DefaultTileFactory(info);
                 mapKit.setTileFactory(tileFactory);
 
-                mapKit.getMainMap().addMouseListener(areaSelectionListener);
                 mapKit.getMainMap().removeMouseListener(pointSelectionListener);
+                mapKit.getMainMap().removeMouseListener(areaSelectionListener);
+                mapKit.getMainMap().addMouseListener(areaSelectionListener);
                 mapKit.setAddressLocationShown(false);
                 mapKit.getMainMap().setOverlayPainter(new AddressLocationPainter(mapKit));
                 if (mapKit.getMainMap().getOverlayPainter() instanceof AddressLocationPainter) {
                     ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(false);
                 }
+
+                firstSelection = null;
             }
         });
 
