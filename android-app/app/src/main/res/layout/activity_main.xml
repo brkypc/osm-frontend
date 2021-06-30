@@ -17,17 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         android:visibility="gone"/>
 
-    <Button
-        android:id="@+id/button_goMap"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="23dp"
-        android:onClick="goMap"
-        android:text="Tüm Rotaları Göster"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
     <TextView
         android:id="@+id/textView_ServiceStatus"
         android:layout_width="wrap_content"
@@ -54,17 +43,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="showMyRoutes"
-        android:text="Benim Rotalarımı Göster"
+        android:text="Tüm Rotalarımı Göster"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_goMap" />
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
+        android:layout_marginTop="290dp"/>
 
     <Button
         android:id="@+id/button_nearToPoint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="showRoutesNearToPint"
-        android:text="Noktaya En Yakın Rotalar"
+        android:text="Noktaya En Yakın Rotalarım"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button" />
@@ -74,7 +64,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="showRoutesNearToPintWithTimeInterval"
-        android:text="Zaman Aralığında Noktaya En Yakın Rotalar"
+        android:text="Zaman Aralığında Noktaya En Yakın Rotalarım"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_nearToPoint" />
@@ -83,10 +73,20 @@
         android:id="@+id/button_insideArea"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Alan içinde kalan rotalar"
+        android:onClick="showRoutesInsideArea"
+        android:text="Alan içinde kalan rotalarım"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_nearToPointWithTimeInterval"
-        android:onClick="showRoutesInsideArea"/>
+        app:layout_constraintTop_toBottomOf="@+id/button_nearToPointWithTimeInterval" />
+
+    <Button
+        android:id="@+id/button_insideAreaTimeInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="showRoutesInsideAreaTimeInterval"
+        android:text="Zaman aralığında alan içinde kalan rotalarım"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_insideArea" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

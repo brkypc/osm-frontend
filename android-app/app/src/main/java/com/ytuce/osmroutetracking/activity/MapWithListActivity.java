@@ -208,7 +208,8 @@ public class MapWithListActivity extends AppCompatActivity {
 
         if ((flags & FLAG_LISTEN_MAP_CLICK) == FLAG_LISTEN_MAP_CLICK) {
             listenMapClicks(adaptor, timeIntervalSearch,
-                    (flags & FLAG_LISTEN_AREA_SELECTION) == FLAG_LISTEN_AREA_SELECTION);
+                    (flags & FLAG_LISTEN_AREA_SELECTION) == FLAG_LISTEN_AREA_SELECTION,
+                    context);
         }
     }
 
@@ -465,15 +466,16 @@ public class MapWithListActivity extends AppCompatActivity {
     }
 
     private void listenMapClicks(TrackingAdaptor trackingAdaptor, boolean timeInterval,
-                                 boolean areaSelection) {
+
+                                 boolean areaSelection, Context context) {
         MapEventsOverlay mapClicksOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
                 if (!areaSelection) {
                     if (timeInterval) {
-                        getClosestPointsWithTimeInterval(p, trackingAdaptor);
+                        getClosestPointsWithTimeInterval(p, trackingAdaptor, context);
                     } else {
-                        getClosestPoints(p, trackingAdaptor);
+                        getClosestPoints(p, trackingAdaptor, context);
                     }
                 }
 
@@ -513,7 +515,7 @@ public class MapWithListActivity extends AppCompatActivity {
                     polygon.setPoints(new ArrayList<>(Arrays.asList(
                             firstSelectedPoint, edge1, p, edge2
                     )));
-                    polygon.getFillPaint().setARGB(100, 255, 0, 0);
+                    polygon.getFillPaint().setARGB(10, 255, 0, 0);
                     if (!added) {
                         map.getOverlays().add(MAP_POLYGON_OVERLAY_ID, polygon);
                     }
@@ -522,6 +524,12 @@ public class MapWithListActivity extends AppCompatActivity {
 
                     marker = null;
                     selectedPointCount = 2;
+
+                    if (timeInterval) {
+                        getRoutesInsideAreaTimeInterval(p, trackingAdaptor, context);
+                    } else {
+                        getRoutesInsideArea(p, trackingAdaptor, context);
+                    }
                 }
 
                 return false;
@@ -535,9 +543,9 @@ public class MapWithListActivity extends AppCompatActivity {
         map.getOverlays().add(mapClicksOverlay);
     }
 
-    public void getClosestPoints(GeoPoint point, TrackingAdaptor trackingAdaptor) {
+    public void getClosestPoints(GeoPoint point, TrackingAdaptor trackingAdaptor, Context context) {
         Call<List<Results>> call = RetrofitClient.getInstance().getApi()
-                .getRoutesClosePoint(point.getLatitude(), point.getLongitude());
+                .getRoutesClosePoint(point.getLatitude(), point.getLongitude(), getClientID(context));
 
         call.enqueue(new Callback<List<Results>>() {
             @Override
@@ -552,7 +560,7 @@ public class MapWithListActivity extends AppCompatActivity {
         });
     }
 
-    public void getClosestPointsWithTimeInterval(GeoPoint point, TrackingAdaptor trackingAdaptor) {
+    public void getClosestPointsWithTimeInterval(GeoPoint point, TrackingAdaptor trackingAdaptor, Context context) {
 
         Call<List<Results>> call;
 
@@ -560,7 +568,7 @@ public class MapWithListActivity extends AppCompatActivity {
 
             call = RetrofitClient.getInstance().getApi()
                     .getRoutesClosePointTimeInterval(point.getLatitude(), point.getLongitude(),
-                            startTimeTimestamp, endTimeTimestamp);
+                            startTimeTimestamp, endTimeTimestamp, getClientID(context));
         } else {
             return;
         }
@@ -574,6 +582,55 @@ public class MapWithListActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<Results>> call, Throwable t) {
                 Log.e("RestService", "(getRotesClosePoint) " + t.getMessage());
+            }
+        });
+    }
+
+    public void getRoutesInsideArea(GeoPoint secondSelectedPoint, TrackingAdaptor trackingAdaptor,
+                                    Context context) {
+
+        Call<List<Results>> call = RetrofitClient.getInstance().getApi().getRoutesInsideArea(
+                firstSelectedPoint.getLatitude(), firstSelectedPoint.getLongitude(),
+                secondSelectedPoint.getLatitude(), secondSelectedPoint.getLongitude(),
+                getClientID(context));
+
+        call.enqueue(new Callback<List<Results>>() {
+            @Override
+            public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
+                trackingAdaptor.setTrackingList(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Results>> call, Throwable t) {
+                Log.e("RestService", "(getRoutesInsideArea) " + t.getMessage());
+            }
+        });
+    }
+
+    public void getRoutesInsideAreaTimeInterval(GeoPoint secondSelectedPoint, TrackingAdaptor trackingAdaptor,
+                                                Context context) {
+
+        Call<List<Results>> call;
+
+        if (startTimeTimestamp != -1 && endTimeTimestamp != -1) {
+            call = RetrofitClient.getInstance().getApi().getRoutesInsideAreaTimeInterval(
+                    firstSelectedPoint.getLatitude(), firstSelectedPoint.getLongitude(),
+                    secondSelectedPoint.getLatitude(), secondSelectedPoint.getLongitude(),
+                    startTimeTimestamp, endTimeTimestamp,
+                    getClientID(context));
+        } else {
+            return;
+        }
+
+        call.enqueue(new Callback<List<Results>>() {
+            @Override
+            public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
+                trackingAdaptor.setTrackingList(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Results>> call, Throwable t) {
+                Log.e("RestService", "(getRoutesInsideArea) " + t.getMessage());
             }
         });
     }

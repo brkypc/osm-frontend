@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Button goMapButton;
     private TextView serviceStatusTextView;
     private ProgressBar progressBar;
 
@@ -40,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
 
         EnvironmentVariables.set();
 
-        goMapButton = findViewById(R.id.button_goMap);
         serviceStatusTextView = findViewById(R.id.textView_ServiceStatus);
         progressBar = findViewById(R.id.progressBar);
 
@@ -117,6 +115,17 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(MapWithListActivity.FLAGS_INTENT_NAME,
                 MapWithListActivity.FLAG_LISTEN_AREA_SELECTION |
                         MapWithListActivity.FLAG_LISTEN_MAP_CLICK);
+        startActivity(intent);
+    }
+
+    public void showRoutesInsideAreaTimeInterval(View view) {
+        Intent intent = new Intent(this, MapWithListActivity.class);
+        intent.putExtra(
+                MapWithListActivity.MAP_MODE_INTENT_NAME, MapWithListActivity.TRACKING_FILTER);
+        intent.putExtra(MapWithListActivity.FLAGS_INTENT_NAME,
+                MapWithListActivity.FLAG_LISTEN_AREA_SELECTION |
+                        MapWithListActivity.FLAG_LISTEN_MAP_CLICK |
+                        MapWithListActivity.FLAG_SHOW_TIME_INTERVAL_SELECTION);
         startActivity(intent);
     }
 
