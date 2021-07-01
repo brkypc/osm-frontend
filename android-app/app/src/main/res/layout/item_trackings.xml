@@ -13,9 +13,9 @@
             android:id="@+id/checkBox_trackingCheck"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:checked="false"
+            android:checked="true"
             android:layout_margin="5dp"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center" />
 
         <LinearLayout
             android:layout_width="wrap_content"

@@ -31,6 +31,11 @@ public class TrackingFilterTileSource extends MapserverTileSource {
         }
     }
 
+    public void setTrackingIds(List<Integer> trackingIds) {
+        this.trackingIds = trackingIds;
+        updateUrl();
+    }
+
     public void addTracking(int trackingId) {
         trackingIds.add(trackingId);
         updateUrl();
@@ -47,7 +52,7 @@ public class TrackingFilterTileSource extends MapserverTileSource {
         updateUrl();
     }
 
-    private void updateUrl() {
+    public void updateUrl() {
         String parameters = idsToString(trackingIds);
         setBaseUrl(new String[]{createBaseUrl(parameters)});
     }

@@ -308,6 +308,14 @@ public class MapWithListActivity extends AppCompatActivity {
                 }
 
                 adaptor.setTrackingList(points);
+
+                ArrayList<Integer> allIds = new ArrayList<>();
+                for (Results point : points) {
+                    allIds.add(point.getTrackingId());
+                }
+
+                ((TrackingFilterTileSource) tileSource).setTrackingIds(allIds);
+                clearMapCache(true);
             }
 
             @Override
@@ -550,7 +558,18 @@ public class MapWithListActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Results>>() {
             @Override
             public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
-                trackingAdaptor.setTrackingList(response.body());
+
+                List<Results> points = response.body();
+
+                trackingAdaptor.setTrackingList(points);
+
+                ArrayList<Integer> allIds = new ArrayList<>();
+                for (Results point : points) {
+                    allIds.add(point.getTrackingId());
+                }
+
+                ((TrackingFilterTileSource) tileSource).setTrackingIds(allIds);
+                clearMapCache(true);
             }
 
             @Override
@@ -576,7 +595,18 @@ public class MapWithListActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Results>>() {
             @Override
             public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
-                trackingAdaptor.setTrackingList(response.body());
+
+                List<Results> points = response.body();
+
+                trackingAdaptor.setTrackingList(points);
+
+                ArrayList<Integer> allIds = new ArrayList<>();
+                for (Results point : points) {
+                    allIds.add(point.getTrackingId());
+                }
+
+                ((TrackingFilterTileSource) tileSource).setTrackingIds(allIds);
+                clearMapCache(true);
             }
 
             @Override
@@ -597,7 +627,18 @@ public class MapWithListActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Results>>() {
             @Override
             public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
-                trackingAdaptor.setTrackingList(response.body());
+
+                List<Results> points = response.body();
+
+                trackingAdaptor.setTrackingList(points);
+
+                ArrayList<Integer> allIds = new ArrayList<>();
+                for (Results point : points) {
+                    allIds.add(point.getTrackingId());
+                }
+
+                ((TrackingFilterTileSource) tileSource).setTrackingIds(allIds);
+                clearMapCache(true);
             }
 
             @Override
@@ -625,7 +666,18 @@ public class MapWithListActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Results>>() {
             @Override
             public void onResponse(Call<List<Results>> call, Response<List<Results>> response) {
-                trackingAdaptor.setTrackingList(response.body());
+
+                List<Results> points = response.body();
+
+                trackingAdaptor.setTrackingList(points);
+
+                ArrayList<Integer> allIds = new ArrayList<>();
+                for (Results point : points) {
+                    allIds.add(point.getTrackingId());
+                }
+
+                ((TrackingFilterTileSource) tileSource).setTrackingIds(allIds);
+                clearMapCache(true);
             }
 
             @Override
