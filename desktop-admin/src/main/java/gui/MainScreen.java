@@ -8,6 +8,7 @@ import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.input.MapClickListener;
 import org.jxmapviewer.painter.CompoundPainter;
 import org.jxmapviewer.viewer.*;
+import tile.OneThreadTileFactory;
 import tile.TileFactoryInfoBuilder;
 
 import javax.swing.*;
@@ -51,7 +52,7 @@ public class MainScreen {
             }
         };
         TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_DEFAULT).build();
-        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
         mapKit.setTileFactory(tileFactory);
 
         GeoPosition istanbul = new GeoPosition(41.015137, 28.979530);
@@ -101,7 +102,7 @@ public class MainScreen {
 
             TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
                     .setParameters(parameters).build();
-            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
             mapKit.setTileFactory(tileFactory);
         };
 
@@ -115,7 +116,7 @@ public class MainScreen {
 
             TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_CLIENT)
                     .setParameters(parameters).build();
-            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
             mapKit.setTileFactory(tileFactory);
         };
 
@@ -130,14 +131,41 @@ public class MainScreen {
                     ((AddressLocationPainter) mapKit.getMainMap().getOverlayPainter()).setVisible(true);
                 }
 
+                List<TrackingModel> resultSet;
+                List<Integer> parameters = new ArrayList<>();
+
                 if (timeSelection)  {
                     if (timeInterval.getKey() != -1 && timeInterval.getValue() != -1) {
-                        list.setModel(consumer.getRoutesCloseToPointTimeInterval(
+                        resultSet = consumer.getRoutesCloseToPointTimeInterval(
                                 location.getLatitude(), location.getLongitude(),
-                                timeInterval.getKey(), timeInterval.getValue()));
+                                timeInterval.getKey(), timeInterval.getValue());
+                        list.setModel(resultSet);
+
+                        for (TrackingModel trackingModel : resultSet) {
+                            parameters.add(trackingModel.getTrackingid());
+                        }
+
+                        TileFactoryInfo info = new TileFactoryInfoBuilder()
+                                .setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
+                                .setParameters(parameters)
+                                .build();
+                        DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
+                        mapKit.setTileFactory(tileFactory);
                     }
                 } else {
-                    list.setModel(consumer.getRoutesCloseToPoint(location.getLatitude(), location.getLongitude()));
+                    resultSet = consumer.getRoutesCloseToPoint(location.getLatitude(), location.getLongitude());
+                    list.setModel(resultSet);
+
+                    for (TrackingModel trackingModel : resultSet) {
+                        parameters.add(trackingModel.getTrackingid());
+                    }
+
+                    TileFactoryInfo info = new TileFactoryInfoBuilder()
+                            .setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
+                            .setParameters(parameters)
+                            .build();
+                    DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
+                    mapKit.setTileFactory(tileFactory);
                 }
             }
         };
@@ -175,17 +203,44 @@ public class MainScreen {
                     CompoundPainter<JXMapViewer> painter = new CompoundPainter<>(painters);
                     mapKit.getMainMap().setOverlayPainter(painter);
 
+                    List<TrackingModel> resultSet;
+                    List<Integer> parameters = new ArrayList<>();
+
                     if (timeSelection) {
                         if (timeInterval.getKey() != -1 && timeInterval.getValue() != -1) {
-                            list.setModel(consumer.getRoutesInsideAreaTimeInterval(
+                            resultSet = consumer.getRoutesInsideAreaTimeInterval(
                                     firstSelection.getLatitude(), firstSelection.getLongitude(),
                                     location.getLatitude(), location.getLongitude(),
-                                    timeInterval.getKey(), timeInterval.getValue()));
+                                    timeInterval.getKey(), timeInterval.getValue());
+                            list.setModel(resultSet);
+
+                            for (TrackingModel trackingModel : resultSet) {
+                                parameters.add(trackingModel.getTrackingid());
+                            }
+
+                            TileFactoryInfo info = new TileFactoryInfoBuilder()
+                                    .setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
+                                    .setParameters(parameters)
+                                    .build();
+                            DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
+                            mapKit.setTileFactory(tileFactory);
                         }
                     } else {
-                        list.setModel(consumer.getRoutesInsideArea(
+                        resultSet = consumer.getRoutesInsideArea(
                                 firstSelection.getLatitude(), firstSelection.getLongitude(),
-                                location.getLatitude(), location.getLongitude()));
+                                location.getLatitude(), location.getLongitude());
+                        list.setModel(resultSet);
+
+                        for (TrackingModel trackingModel : resultSet) {
+                            parameters.add(trackingModel.getTrackingid());
+                        }
+
+                        TileFactoryInfo info = new TileFactoryInfoBuilder()
+                                .setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
+                                .setParameters(parameters)
+                                .build();
+                        DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
+                        mapKit.setTileFactory(tileFactory);
                     }
 
                     firstSelection = null;
@@ -205,7 +260,7 @@ public class MainScreen {
             list.removeListSelectionListener(trackingSelectionListener);
 
             TileFactoryInfo info  = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_DEFAULT).build();
-            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
             mapKit.setTileFactory(tileFactory);
 
             mapKit.getMainMap().removeMouseListener(pointSelectionListener);
@@ -230,9 +285,9 @@ public class MainScreen {
             list.removeListSelectionListener(clientSelectionListener);
             list.addListSelectionListener(trackingSelectionListener);
 
-            TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
-                    .build();
-            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_CLIENT)
+                    .setParameters(new ArrayList<>(Collections.singletonList(clientId))).build();
+            DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
             mapKit.setTileFactory(tileFactory);
 
             mapKit.getMainMap().removeMouseListener(pointSelectionListener);
@@ -253,10 +308,12 @@ public class MainScreen {
             list.removeListSelectionListener(clientSelectionListener);
             list.addListSelectionListener(trackingSelectionListener);
 
+            /*
             TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
                     .build();
-            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
             mapKit.setTileFactory(tileFactory);
+             */
 
             mapKit.getMainMap().removeMouseListener(areaSelectionListener);
             mapKit.getMainMap().removeMouseListener(pointSelectionListener);
@@ -277,12 +334,12 @@ public class MainScreen {
             if (timeInterval.getKey() != -1 && timeInterval.getValue() != -1) {
                 list.removeListSelectionListener(clientSelectionListener);
                 list.addListSelectionListener(trackingSelectionListener);
-
+                /*
                 TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
                         .build();
-                DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+                DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
                 mapKit.setTileFactory(tileFactory);
-
+                */
                 mapKit.getMainMap().removeMouseListener(areaSelectionListener);
                 mapKit.getMainMap().removeMouseListener(pointSelectionListener);
                 mapKit.getMainMap().addMouseListener(pointSelectionListener);
@@ -303,12 +360,12 @@ public class MainScreen {
 
             list.removeListSelectionListener(clientSelectionListener);
             list.addListSelectionListener(trackingSelectionListener);
-
+            /*
             TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
                     .build();
-            DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+            DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
             mapKit.setTileFactory(tileFactory);
-
+            */
             mapKit.getMainMap().removeMouseListener(pointSelectionListener);
             mapKit.getMainMap().removeMouseListener(areaSelectionListener);
             mapKit.getMainMap().addMouseListener(areaSelectionListener);
@@ -329,12 +386,12 @@ public class MainScreen {
             if (timeInterval.getKey() != -1 && timeInterval.getValue() != -1) {
                 list.removeListSelectionListener(clientSelectionListener);
                 list.addListSelectionListener(trackingSelectionListener);
-
+                /*
                 TileFactoryInfo info = new TileFactoryInfoBuilder().setType(TileFactoryInfoBuilder.TYPE_FILTER_TRACKING)
                         .build();
-                DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+                DefaultTileFactory tileFactory = new OneThreadTileFactory(info);
                 mapKit.setTileFactory(tileFactory);
-
+                 */
                 mapKit.getMainMap().removeMouseListener(pointSelectionListener);
                 mapKit.getMainMap().removeMouseListener(areaSelectionListener);
                 mapKit.getMainMap().addMouseListener(areaSelectionListener);
